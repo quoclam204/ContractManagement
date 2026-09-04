@@ -1,0 +1,678 @@
+HỆ THỐNG QUẢN LÝ HỢP ĐỒNG DOANH NGHIỆP
+(Contract Lifecycle Management System — CLM)
+Tài liệu Kiến trúc, SRS & Phân công Nhóm 5 người | .NET 9 + React
+Phiên bản 2 — cập nhật theo review kiến trúc & phân công
+Ghi chú phiên bản 2
+Tài liệu đã được cập nhật theo góp ý kiến trúc trước khi implement (Modular Monolith thay vì Microservices, MediatR không bắt buộc, storage qua abstraction, Hangfire + RabbitMQ, Outbox/Idempotent Consumer, Logging & Monitoring, tách Workflow config/runtime, versioning Template & Workflow, E-signature dùng Mock/OTP cho MVP, ưu tiên lại phạm vi AI và Testing) và cập nhật lại cách phân công nhóm theo yêu cầu: 1 người làm lead kiêm giữ kiến trúc/convention, cả 5 người đều code và chia đều task, tập trung backend .NET nhưng mỗi sprint phải có ít nhất 1 flow người dùng dùng được (end-to-end).
+1. Tổng quan hệ thống
+Hệ thống Quản lý Hợp đồng (Contract Lifecycle Management) giúp doanh nghiệp số hóa toàn bộ vòng đời một hợp đồng, từ soạn thảo, phê duyệt, ký kết, theo dõi thực thi cho đến gia hạn hoặc thanh lý. Hệ thống bổ sung một trợ lý AI đọc và phân tích hợp đồng, giúp rút ngắn thời gian rà soát và giảm rủi ro pháp lý.
+1.1. Vòng đời hợp đồng (Contract Lifecycle)
+Soạn thảo (Draft) → Trình duyệt (Pending Approval) → Phê duyệt (Approved) → Ký (Signed) → Đang hiệu lực (Active) → Sắp hết hạn (Expiring) → Gia hạn (Renewed) / Thanh lý (Terminated)
+1.2. Yêu cầu chức năng (Functional Requirements)
+Mã
+Chức năng
+Mô tả
+FR-01
+Quản lý người dùng & phân quyền
+Đăng nhập (JWT), phân quyền theo vai trò (Admin, Trưởng phòng, Nhân viên, Người phê duyệt) bằng RBAC.
+FR-02
+Quản lý khách hàng / đối tác
+Lưu hồ sơ đối tác, mã số thuế, người đại diện, lịch sử giao dịch với từng đối tác.
+FR-03
+Quản lý loại hợp đồng & mẫu (Template)
+Cấu hình các loại hợp đồng (Dịch vụ, Mua bán, Lao động...) và mẫu hợp đồng dùng lại nhiều lần. Mẫu hỗ trợ versioning.
+FR-04
+Soạn thảo & quản lý hợp đồng
+Tạo hợp đồng từ mẫu hoặc từ đầu, gắn đối tác, giá trị, thời hạn, điều khoản, đính kèm file.
+FR-05
+Quy trình phê duyệt (Workflow Engine)
+Luồng duyệt nhiều cấp có thể cấu hình (tách WorkflowDefinition/WorkflowStep khỏi dữ liệu thực thi); ghi log người duyệt, thời gian, ý kiến.
+FR-06
+Ký hợp đồng điện tử (E-signature)
+MVP: ký nội bộ bằng OTP hoặc Mock Signature qua SignatureProvider abstraction. Tích hợp VNPT-CA/VNeID thật là Stretch Goal.
+FR-07
+Lưu trữ & quản lý tệp đính kèm
+Upload, versioning tài liệu hợp đồng (PDF/Word), lưu qua storage abstraction — Dev/local dùng MinIO, Production có thể dùng Azure Blob Storage.
+FR-08
+Theo dõi hiệu lực & cảnh báo hết hạn
+Hangfire job nền quét hợp đồng sắp hết hạn (30/15/7 ngày) và gửi cảnh báo.
+FR-09
+Gia hạn / chấm dứt hợp đồng
+Tạo phụ lục gia hạn hoặc biên bản thanh lý gắn liền hợp đồng gốc.
+FR-10
+Theo dõi giá trị & tiến độ thanh toán
+Ghi nhận các đợt thanh toán theo hợp đồng, đối chiếu công nợ với đối tác.
+FR-11
+Audit Trail & lịch sử thay đổi
+Ghi log bất biến mọi thao tác tạo/sửa/duyệt/ký để phục vụ đối soát, kiểm toán.
+FR-12
+Dashboard & báo cáo
+Thống kê số lượng, giá trị hợp đồng theo trạng thái, phòng ban, đối tác, thời gian.
+FR-13
+Thông báo (Notification)
+Email / thông báo trong ứng dụng khi có hợp đồng cần duyệt, ký, hoặc sắp hết hạn — xử lý bất đồng bộ qua RabbitMQ.
+FR-14
+AI Contract Assistant
+AI đọc file hợp đồng. MVP ưu tiên: tóm tắt, trích xuất điều khoản, phát hiện rủi ro. Q&A và so sánh hợp đồng là Stretch Goal (chi tiết mục 6).
+1.3. Yêu cầu phi chức năng (Non-Functional Requirements)
+Bảo mật: Mã hóa dữ liệu khi truyền (TLS 1.3) và khi lưu trữ (AES-256); phân quyền RBAC chi tiết theo module và theo hợp đồng.
+Toàn vẹn dữ liệu: Không cho phép sửa hợp đồng đã ký; mọi thay đổi sau khi Active phải qua phụ lục có versioning.
+Hiệu năng: Dashboard và danh sách hợp đồng phản hồi dưới 300ms với 100.000 bản ghi (có phân trang, index hợp lý).
+Độ tin cậy: Background Job cảnh báo hết hạn chạy ổn định hằng ngày, tự retry khi lỗi kết nối DB/Email.
+Khả năng mở rộng: Kiến trúc Modular Monolith cho phép thêm loại hợp đồng, luồng duyệt mới mà không cần sửa code lõi (cấu hình động); các module tách bounded context rõ ràng để có thể tách thành service riêng sau này nếu cần.
+Lưu trữ lâu dài: Tài liệu hợp đồng và log audit lưu tối thiểu theo thời hạn pháp lý yêu cầu (ví dụ 10 năm).
+2. Kiến trúc & Tech Stack
+2.1. Kiến trúc tổng thể
+Đề xuất kiến trúc được điều chỉnh để phù hợp với quy mô đội 5 người và thời gian dự án, ưu tiên đơn giản, dễ debug, dễ trace hơn là chạy theo xu hướng phức tạp không cần thiết.
+Modular Monolith + Stateless API
+ — kiến trúc chính. Team 5 người chưa cần Microservices vì làm tăng độ phức tạp về deploy, communication giữa service và debugging, trong khi lợi ích chưa cần thiết ở quy mô dự án này.
+Module hoá theo bounded context
+ — tách rõ theo domain (Identity, Contract, Workflow, Signature, Payment/Attachment, Notification/AI) trong cùng một solution/process, dùng chung một database (schema/namespace theo module), để nếu cần vẫn có thể tách thành service riêng sau này mà không phải viết lại từ đầu.
+Luồng xử lý mặc định: 
+Controller → Application Service / Use Case → Domain → Infrastructure.
+MediatR/CQRS: không bắt buộc.
+ Team có thể giữ flow đơn giản như trên (Use Case class thuần, không qua MediatR pipeline) — vẫn đảm bảo separation of concerns nhưng dễ trace và debug hơn khi mới làm quen kiến trúc. Nhóm nào quen CQRS có thể vẫn dùng MediatR cho module của mình, miễn convention nhất quán trong cùng module.
+2.2. Bảng công nghệ
+BACKEND (.NET 9)
+FRONTEND & AI
+ASP.NET Core Web API (.NET 9)
+Modular Monolith, layering Controller → Application/Use Case → Domain → Infrastructure
+Clean Architecture cho cấu trúc thư mục; MediatR/CQRS không bắt buộc, dùng khi phù hợp
+Entity Framework Core + SQL Server
+Stateless (C#) cho State Machine hợp đồng
+Hangfire cho scheduled job (quét hợp đồng sắp hết hạn...)
+RabbitMQ cho tác vụ async (AI Analysis, Notification); chưa cần Kafka trong scope hiện tại
+Storage qua abstraction IStorageProvider — Dev/local: MinIO, Production: Azure Blob Storage (hoặc S3-compatible khác)
+FluentValidation, Serilog + Seq, Correlation ID, Health Check, Swashbuckle
+OpenTelemetry: Stretch Goal
+React 19 (Vite) + TypeScript
+Tailwind CSS + Shadcn UI
+TanStack Query (React Query) v5
+Recharts cho Dashboard báo cáo
+AI: Claude / GPT-4o cho đọc & phân tích hợp đồng
+Signature: SignatureProvider abstraction — MVP dùng Mock/OTP nội bộ, VNPT-CA/VNeID là Stretch Goal
+AI Spec Framework: GitHub SpecKit CLI
+2.3. Reliability cho các flow bất đồng bộ (RabbitMQ)
+Khi dùng RabbitMQ cho các flow async, nhóm nên tìm hiểu thêm hai pattern sau để tăng độ tin cậy:
+Outbox Pattern
+ — đảm bảo message chỉ được publish khi transaction ghi DB đã commit thành công, tránh mất event hoặc publish message cho dữ liệu chưa được lưu.
+Idempotent Consumer
+ — đảm bảo consumer xử lý đúng 1 lần dù message bị gửi lại (retry/redelivery), tránh side-effect trùng lặp (ví dụ gửi 2 email cho cùng 1 sự kiện).
+Hai pattern này đặc biệt hữu ích cho các flow: Approve → Notification, và Upload → AI Analysis. Ở MVP có thể triển khai flow đơn giản trước (publish trực tiếp sau khi commit, consumer check trạng thái trước khi xử lý), rồi bổ sung Outbox/Idempotent Consumer đầy đủ như một hạng mục Should Have nếu còn thời gian — không bắt buộc phải có ngay từ đầu.
+2.4. Logging & Monitoring
+Serilog cho structured logging trong toàn bộ backend.
+Seq làm nơi tập trung log, hỗ trợ tìm kiếm/lọc theo Correlation ID khi debug flow xuyên nhiều module hoặc qua queue.
+Correlation ID gắn xuyên suốt 1 request/flow (kể cả khi qua RabbitMQ) để trace log dễ dàng.
+Health Check endpoint cho API, DB, RabbitMQ, Storage — phục vụ giám sát và Docker healthcheck.
+OpenTelemetry (tracing/metrics chi tiết hơn): để ở Stretch Goal, làm sau khi phần lõi ổn định.
+3. Các Use Case cốt lõi
+Mã
+Use Case
+Actor chính
+Mô tả luồng xử lý
+UC-01
+Soạn thảo hợp đồng từ mẫu
+Nhân viên
+Chọn loại hợp đồng, hệ thống nạp Template (theo version hiện hành), người dùng điền thông tin đối tác, giá trị, điều khoản, lưu ở trạng thái Draft.
+UC-02
+Trình & phê duyệt hợp đồng
+Nhân viên / Người duyệt
+Nhân viên gửi duyệt; hệ thống định tuyến theo WorkflowDefinition đang active (theo giá trị hợp đồng); người duyệt Approve/Reject kèm ý kiến, ghi nhận vào ApprovalStep (runtime).
+UC-03
+Ký hợp đồng điện tử
+Người có thẩm quyền
+Sau khi Approved, các bên ký qua SignatureProvider (MVP: Mock/OTP); hệ thống xác thực chữ ký, khóa nội dung file, chuyển trạng thái Signed → Active.
+UC-04
+Cảnh báo hợp đồng sắp hết hạn
+Hangfire Job
+Job quét hằng ngày các hợp đồng Active có ngày hết hạn trong 30/15/7 ngày tới, publish message qua RabbitMQ để gửi Email/Notification cho người phụ trách.
+UC-05
+AI phân tích hợp đồng
+Nhân viên / AI Service
+Người dùng upload file PDF/Word; request được đẩy qua RabbitMQ; AI Service trích xuất loại hợp đồng, giá trị, ngày ký/hết hạn, tóm tắt và liệt kê điều khoản rủi ro (MVP). Q&A và so sánh hợp đồng là Stretch Goal.
+UC-06
+Gia hạn / thanh lý hợp đồng
+Nhân viên / Người duyệt
+Tạo phụ lục gia hạn (kéo dài CurrentPeriodEnd) hoặc biên bản thanh lý (chuyển trạng thái Terminated), gắn liền hợp đồng gốc.
+4. Thiết kế cơ sở dữ liệu (Database Schema)
+Thiết kế được trình bày dưới dạng bảng thay vì sơ đồ ASCII để dễ đọc và dễ triển khai migration bằng Entity Framework Core trên SQL Server. Khóa chính viết tắt PK, khóa ngoại viết tắt FK. So với bản gốc, phần Workflow được tách thành bảng cấu hình (WORKFLOW_DEFINITIONS, WORKFLOW_STEPS) riêng khỏi dữ liệu thực thi (APPROVAL_STEPS), và các bảng liên quan Template/Workflow được bổ sung trường Version.
+4.1. Bảng USERS (Người dùng)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh người dùng
+FullName
+string
+Họ tên
+Email
+string
+Đăng nhập, duy nhất
+PasswordHash
+string
+Mật khẩu đã băm
+Role
+enum
+Admin / Manager / Staff / Approver
+DepartmentId (FK)
+Guid
+Thuộc phòng ban nào
+IsActive
+bool
+Còn hoạt động hay đã khóa
+4.2. Bảng DEPARTMENTS (Phòng ban)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh phòng ban
+Name
+string
+Tên phòng ban
+ManagerId (FK)
+Guid
+Trưởng phòng (User)
+4.3. Bảng PARTNERS (Khách hàng / Đối tác)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh đối tác
+Name
+string
+Tên công ty / cá nhân
+TaxCode
+string
+Mã số thuế
+Representative
+string
+Người đại diện pháp luật
+ContactEmail
+string
+Email liên hệ
+Address
+string
+Địa chỉ
+4.4. Bảng CONTRACT_TYPES (Loại hợp đồng / Template)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+Name
+string
+Dịch vụ / Mua bán / Lao động...
+WorkflowDefinitionId (FK)
+Guid
+Luồng duyệt áp dụng mặc định (trỏ tới WORKFLOW_DEFINITIONS)
+TemplateVersion
+int
+Phiên bản mẫu hợp đồng hiện hành (mới — hỗ trợ versioning Template)
+4.5. Bảng CONTRACTS (Hợp đồng) — bảng trung tâm
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh hợp đồng
+ContractNumber
+string
+Số hợp đồng, duy nhất
+ContractTypeId (FK)
+Guid
+Loại hợp đồng
+PartnerId (FK)
+Guid
+Đối tác ký kết
+OwnerId (FK)
+Guid
+Nhân viên phụ trách (User)
+Title
+string
+Tiêu đề / trích yếu
+Value
+decimal
+Giá trị hợp đồng
+TemplateVersionUsed
+int
+Version của Template dùng tại thời điểm tạo (mới — để thay đổi Template mới không ảnh hưởng hợp đồng đang xử lý)
+SignedDate
+DateTime?
+Ngày ký
+EffectiveDate
+DateTime
+Ngày hiệu lực
+ExpiryDate
+DateTime
+Ngày hết hạn
+Status
+enum
+Draft/PendingApproval/Approved/Signed/Active/Expiring/Renewed/Terminated
+FileUrl
+string
+Đường dẫn file gốc trên Object Storage (qua storage abstraction)
+ParentContractId (FK, null)
+Guid?
+Trỏ về hợp đồng gốc nếu đây là phụ lục gia hạn
+4.6. Bảng WORKFLOW_DEFINITIONS (Cấu hình luồng duyệt — mới)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh luồng duyệt
+Name
+string
+Tên luồng duyệt
+ContractTypeId (FK, null)
+Guid?
+Áp dụng cho loại hợp đồng nào (null = mặc định chung)
+ConditionExpression
+string
+Điều kiện áp dụng, ví dụ: giá trị hợp đồng >= X
+Version
+int
+Phiên bản cấu hình (hỗ trợ versioning Workflow)
+IsActive
+bool
+Đang được áp dụng hay đã thay bằng version mới
+4.7. Bảng WORKFLOW_STEPS (Cấu hình bước duyệt — mới)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+WorkflowDefinitionId (FK)
+Guid
+Thuộc luồng duyệt nào
+StepOrder
+int
+Thứ tự bước duyệt
+ApproverRole
+enum
+Vai trò/cấp duyệt yêu cầu ở bước này (ví dụ: Manager, Director)
+IsRequired
+bool
+Bước bắt buộc hay có thể bỏ qua
+4.8. Bảng APPROVAL_STEPS (Bước phê duyệt — runtime)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+ContractId (FK)
+Guid
+Hợp đồng liên quan
+WorkflowDefinitionId (FK)
+Guid
+Luồng duyệt áp dụng tại thời điểm submit (snapshot version)
+ApproverId (FK)
+Guid
+Người duyệt (User)
+StepOrder
+int
+Thứ tự bước duyệt
+Decision
+enum
+Pending/Approved/Rejected
+Comment
+string
+Ý kiến người duyệt
+DecidedAt
+DateTime?
+Thời điểm ra quyết định
+4.9. Bảng SIGNATURES (Chữ ký điện tử)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+ContractId (FK)
+Guid
+Hợp đồng được ký
+SignerId (FK)
+Guid
+Người ký (User hoặc Partner)
+SignatureMethod
+enum
+Mock / OTP nội bộ (MVP) / Chữ ký số CA (Stretch Goal)
+SignedAt
+DateTime
+Thời điểm ký
+SignatureHash
+string
+Mã băm xác thực chữ ký
+4.10. Bảng PAYMENTS (Đợt thanh toán)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+ContractId (FK)
+Guid
+Hợp đồng liên quan
+Description
+string
+Đợt thanh toán số mấy / nội dung
+Amount
+decimal
+Số tiền
+DueDate
+DateTime
+Hạn thanh toán
+Status
+enum
+Pending/Paid/Overdue
+4.11. Bảng ATTACHMENTS (Tệp đính kèm & versioning)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+ContractId (FK)
+Guid
+Hợp đồng liên quan
+FileName
+string
+Tên file
+Version
+int
+Số phiên bản
+FileUrl
+string
+Đường dẫn lưu trữ (qua storage abstraction)
+UploadedBy (FK)
+Guid
+Người upload (User)
+UploadedAt
+DateTime
+Thời điểm upload
+4.12. Bảng AI_ANALYSIS_RESULTS (Kết quả AI phân tích)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+ContractId (FK)
+Guid
+Hợp đồng được phân tích
+Summary
+nvarchar(max)
+Tóm tắt nội dung hợp đồng do AI sinh
+ExtractedValue
+decimal?
+Giá trị AI trích xuất được
+ExtractedExpiryDate
+DateTime?
+Ngày hết hạn AI trích xuất được
+RiskFlags
+nvarchar(max) (JSON)
+Danh sách điều khoản rủi ro phát hiện được
+AnalyzedAt
+DateTime
+Thời điểm phân tích
+4.13. Bảng AUDIT_LOGS (Nhật ký kiểm toán — bất biến)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+int64
+Định danh, tăng dần
+EntityName
+string
+Tên bảng bị tác động (Contract, Payment...)
+EntityId
+Guid
+Id bản ghi bị tác động
+Action
+enum
+Create/Update/Approve/Sign/Terminate
+PerformedBy (FK)
+Guid
+Người thực hiện (User)
+PerformedAt
+DateTime
+Thời điểm thực hiện
+DataSnapshot (JSON)
+nvarchar(max)
+Ảnh chụp dữ liệu trước/sau thay đổi
+4.14. Bảng NOTIFICATIONS (Thông báo)
+Trường (Field)
+Kiểu dữ liệu
+Ghi chú
+Id (PK)
+Guid
+Định danh
+UserId (FK)
+Guid
+Người nhận
+ContractId (FK)
+Guid
+Hợp đồng liên quan
+Type
+enum
+ApprovalRequest/SignRequest/ExpiringSoon
+IsRead
+bool
+Đã đọc hay chưa
+CreatedAt
+DateTime
+Thời điểm tạo
+4.15. Quan hệ chính giữa các bảng
+PARTNERS (1) — (nhiều) CONTRACTS: một đối tác có thể có nhiều hợp đồng.
+CONTRACTS (1) — (nhiều) APPROVAL_STEPS, SIGNATURES, PAYMENTS, ATTACHMENTS, AI_ANALYSIS_RESULTS, NOTIFICATIONS.
+WORKFLOW_DEFINITIONS (1) — (nhiều) WORKFLOW_STEPS: cấu hình luồng duyệt gồm nhiều bước.
+WORKFLOW_DEFINITIONS (1) — (nhiều) APPROVAL_STEPS: mỗi bước duyệt thực tế snapshot theo 1 version cấu hình.
+CONTRACTS (1) — (nhiều) CONTRACTS qua ParentContractId: hợp đồng gốc có thể có nhiều phụ lục gia hạn.
+USERS (1) — (nhiều) CONTRACTS qua OwnerId: một nhân viên phụ trách nhiều hợp đồng.
+DEPARTMENTS (1) — (nhiều) USERS: một phòng ban có nhiều nhân viên.
+5. Máy trạng thái hợp đồng (State Machine)
+Trạng thái hiện tại
+Sự kiện (Trigger)
+Trạng thái tiếp theo
+Draft
+Gửi duyệt (Submit)
+PendingApproval
+PendingApproval
+Duyệt (Approve — tất cả các bước)
+Approved
+PendingApproval
+Từ chối (Reject)
+Draft
+Approved
+Ký đủ các bên (Sign)
+Signed
+Signed
+Đến ngày hiệu lực (EffectiveDate)
+Active
+Active
+Còn ≤ 30 ngày đến hạn
+Expiring
+Expiring
+Tạo phụ lục gia hạn (Renew)
+Renewed → Active
+Expiring / Active
+Chấm dứt (Terminate)
+Terminated
+6. AI Contract Assistant (Điểm nhấn nổi bật)
+Module AI giúp rút ngắn thời gian rà soát hợp đồng và giảm rủi ro pháp lý cho doanh nghiệp, là điểm khác biệt chính của hệ thống so với các phần mềm quản lý hợp đồng thông thường.
+6.1. Phạm vi AI theo MVP
+Để đảm bảo phần lõi (Contract lifecycle, Workflow, Auth) chắc chắn trước, phạm vi AI được ưu tiên rõ ràng:
+Must Have (MVP)
+Đọc trực tiếp file PDF/Word do người dùng upload.
+Tóm tắt nội dung hợp đồng bằng ngôn ngữ tự nhiên.
+Trích xuất tự động: loại hợp đồng, giá trị, ngày ký, ngày hết hạn, các bên liên quan.
+Phát hiện điều khoản bất thường hoặc rủi ro (phạt vi phạm không rõ ràng, thời hạn thanh toán dài bất thường, thiếu điều kiện chấm dứt...).
+Stretch Goal
+Hỏi — đáp (Q&A) trực tiếp trên nội dung hợp đồng.
+So sánh hai phiên bản hợp đồng để chỉ ra phần thay đổi.
+6.2. Ví dụ luồng xử lý
+Người dùng upload HopDongDichVu.pdf → AI trả về:
+Loại: Hợp đồng dịch vụ
+Giá trị: 500.000.000 VNĐ
+Ngày ký: 01/09/2026 — Hết hạn: 01/09/2027
+Rủi ro: điều khoản phạt chưa rõ ràng; thời hạn thanh toán 60 ngày; chưa quy định rõ điều kiện chấm dứt
+6.3. Kiến trúc kỹ thuật đề xuất
+API riêng AiAnalysisController nhận yêu cầu, publish message qua RabbitMQ để AI Service (Claude/GPT-4o) xử lý bất đồng bộ, không chặn luồng chính.
+Trích xuất text từ PDF/Word bằng thư viện OCR/parsing trước khi gửi cho AI (giảm chi phí token).
+Kết quả AI lưu vào bảng AI_ANALYSIS_RESULTS, hiển thị dưới dạng thẻ cảnh báo trên giao diện chi tiết hợp đồng.
+Áp dụng Idempotent Consumer cho consumer xử lý AI Analysis để tránh phân tích trùng khi message bị redeliver.
+7. Quy trình phát triển theo hướng AI-Driven Development
+Đây là yêu cầu bắt buộc của đợt project lần này: cả nhóm không chỉ code như bình thường mà phải áp dụng quy trình AI-Driven Development — tức là dùng AI Agent xuyên suốt từ giai đoạn thiết kế đến khi hoàn thiện, thay vì chỉ dùng AI để gợi ý code rời rạc.
+7.1. AI-Driven Development là gì
+Là phương pháp phát triển phần mềm trong đó AI Agent tham gia trực tiếp vào toàn bộ vòng đời dự án — từ đặc tả yêu cầu (Spec), thiết kế kiến trúc, sinh code, đến tự kiểm thử và tự sửa lỗi — dựa trên một bộ tài liệu "Spec" chuẩn hoá do con người định nghĩa trước, thay vì con người viết code thủ công từng dòng. Con người đóng vai trò định hướng, review và ra quyết định; AI đóng vai trò thực thi có giám sát.
+7.2. Công cụ bắt buộc chọn 1
+GitHub SpecKit CLI: 
+framework Spec-Driven Development chính thức, dùng các lệnh /speckit.constitution, /speckit.specify, /speckit.tasks, /speckit.implement để AI sinh tài liệu và code theo từng bước có kiểm soát.
+Framework AI khác tương đương: 
+nhóm có thể tự tìm hiểu và chọn framework work-with-AI khác (ví dụ BMAD-Method, Aider với custom spec flow...) miễn là đảm bảo cùng nguyên tắc: có Spec rõ ràng trước khi code, AI sinh code có thể truy vết lại yêu cầu.
+7.3. Các bước triển khai bắt buộc
+Bước 0 — Constitution (Thiết lập quy chuẩn dự án): 
+chạy /speckit.constitution (hoặc tự viết file quy ước tương đương) để chốt trước: coding convention, cấu trúc thư mục Clean Architecture (Modular Monolith), quy tắc đặt tên, framework test (xUnit), tiêu chí Definition of Done — để AI Agent tuân theo xuyên suốt, tránh mỗi lần sinh code một kiểu. Đây là việc lead phụ trách chốt cùng cả nhóm trước khi bắt tay code.
+Bước 1 — Design: 
+xác định kiến trúc tổng thể (Modular Monolith), vẽ ERD, xác định luồng nghiệp vụ chính (State Machine hợp đồng, luồng phê duyệt) trước khi để AI code.
+Bước 2 — Specify (Viết tài liệu SRS & Diagram): 
+chạy /speckit.specify để AI Agent (hoặc nhóm) sinh tài liệu Yêu cầu chức năng/phi chức năng, ERD, sơ đồ State Machine, Sequence Diagram, và bản nháp API Spec (swagger.json) — làm "nguồn sự thật" (source of truth) cho các bước sau.
+Bước 3 — Phân rã Task (Task Breakdown): 
+chạy /speckit.tasks để AI tách bản Spec đã chốt thành danh sách task nhỏ theo từng layer/module (Domain, Application, Infrastructure, API), gán rõ cho từng thành viên — giúp cả nhóm 5 người làm song song mà không giẫm code lên nhau.
+Bước 4 — Implement: 
+chạy /speckit.implement để AI Agent sinh code theo từng layer (Domain → Application → Infrastructure → API) bám sát Spec và Task đã chốt ở Bước 2–3, không tự ý bịa thêm nghiệp vụ ngoài Spec.
+Bước 5 — Testing & Tự sửa lỗi (Convergence Loop): 
+AI Agent tự chạy test (dotnet test), đọc log lỗi/build error và tự điều chỉnh code C# cho đến khi 100% test Pass, lặp lại nhiều vòng nếu cần.
+Bước 6 — Review & Merge (con người kiểm soát): 
+sau khi AI báo Pass, thành viên phụ trách module đó phải tự đọc lại code, đối chiếu với Spec, kiểm tra bảo mật/logic nghiệp vụ trước khi Pull Request và merge vào nhánh chính. Lead review thêm về convention/architecture trước khi merge vào nhánh chính — AI hỗ trợ, con người vẫn chịu trách nhiệm cuối cùng.
+Bước 7 — Đóng gói & Triển khai: 
+Docker hóa toàn bộ hệ thống (API, Frontend, SQL Server, MinIO, RabbitMQ, Seq), viết README/tài liệu vận hành, chuẩn bị demo trước hội đồng đánh giá.
+7.4. Lựa chọn AI Model theo điều kiện từng người
+Có AI xịn (Claude, Cursor Pro...): 
+cứ dùng trực tiếp để đạt chất lượng và tốc độ tốt nhất.
+Không có AI trả phí: 
+dùng OpenCode kết hợp model miễn phí (free-tier) tương đương, vẫn tuân theo cùng quy trình Spec-Driven ở trên — chấp nhận tốc độ/chất lượng sinh code thấp hơn nhưng vẫn phải theo đúng 4 bước Design → SRS/Diagram → Implement → Testing.
+7.5. Mốc bắt đầu
+Cả nhóm chính thức bắt tay vào làm sau kỳ nghỉ lễ — trước đó tập trung hoàn thiện Spec/SRS và chọn công cụ AI phù hợp với từng thành viên.
+8. Phân công nhóm 5 người
+Cách phân công được điều chỉnh theo 3 nguyên tắc:
+1 người làm Lead
+ — chịu trách nhiệm nắm kĩ architecture & convention (Clean Architecture/Modular Monolith, coding convention, cấu trúc thư mục, Definition of Done ở Bước 0 mục 7.3), setup khung project & CI/CD ban đầu, review code/PR của cả nhóm, và là người quyết định cuối khi có xung đột kỹ thuật.
+Cả 5 người đều code
+ — kể cả Lead vẫn nhận module riêng và code như các thành viên khác, không chỉ làm quản lý; task được chia đều theo module/layer để không ai bị quá tải hoặc rảnh rỗi.
+Tập trung backend .NET, nhưng mỗi sprint phải có 1 flow người dùng dùng được
+ — dự án ưu tiên chiều sâu backend, nhưng để tránh tích lũy rủi ro tích hợp đến cuối kỳ, mỗi sprint (2 tuần) nhóm thống nhất chọn 1 flow xuyên suốt (end-to-end, có UI tối thiểu dù chưa cần đẹp) để demo được thật, thay vì chỉ có API rời rạc chưa nối được với nhau.
+8.1. Phân công theo module
+Người
+Module phụ trách
+Bảng dữ liệu liên quan
+Người 1 — Lead
+Kiến trúc & Convention (Bước 0 Constitution, cấu trúc thư mục, coding convention, CI/CD, code review toàn nhóm)
++ Module: User, Auth (JWT), Phân quyền RBAC, Department
+USERS, DEPARTMENTS
+Người 2
+Contract CRUD, Contract Type & Template (versioning), State Machine
+CONTRACTS, CONTRACT_TYPES
+Người 3
+Partner/Customer, Payment, Attachment & Versioning, Storage abstraction (IStorageProvider: MinIO/Azure Blob)
+PARTNERS, PAYMENTS, ATTACHMENTS
+Người 4
+Workflow (WorkflowDefinition/WorkflowStep — config), Approval Step (runtime), E-signature (SignatureProvider: Mock/OTP)
+WORKFLOW_DEFINITIONS, WORKFLOW_STEPS, APPROVAL_STEPS, SIGNATURES
+Người 5
+Dashboard/Report, Notification (RabbitMQ consumer), AI Contract Assistant, Hangfire job cảnh báo hết hạn
+NOTIFICATIONS, AI_ANALYSIS_RESULTS
+8.2. Nguyên tắc "1 flow demo mỗi sprint"
+Đầu mỗi sprint, cả nhóm thống nhất 1 flow xuyên suốt sẽ demo được vào cuối sprint (xem chi tiết ở Roadmap mục 9).
+Người phụ trách module liên quan tới flow đó tự làm luôn phần UI tối thiểu (form/list cơ bản, không cần chăm chút giao diện) để nối được API với FE thật, thay vì chờ có người làm FE riêng.
+Việc này không thay đổi trọng tâm backend .NET của dự án — UI tối thiểu chỉ đủ để chứng minh flow chạy được thật, phần polish UI có thể làm sau nếu còn thời gian.
+Nếu 1 sprint có nguy cơ không kịp làm đủ để có flow demo, ưu tiên cắt bớt phần nâng cao (theo bảng Must/Should/Stretch ở mục 12) để giữ được flow lõi chạy được, thay vì để dở dang nhiều thứ cùng lúc.
+9. Kế hoạch triển khai (Roadmap)
+Phase
+Thời gian
+Mục tiêu
+Deliverables
+Flow demo cuối sprint
+Chuẩn bị
+Trước nghỉ lễ
+Design + Spec/SRS
+Chốt kiến trúc (Modular Monolith), ERD, convention (Lead phụ trách), chọn công cụ AI (SpecKit/framework khác) cho từng thành viên.
+—
+Phase 1
+Tuần 1–2 (sau lễ)
+Nền tảng & CRUD cơ bản
+Modular Monolith skeleton, DB Migration, Auth/RBAC, CRUD Partner/Contract Type & Template.
+Đăng nhập → tạo hợp đồng nháp (Draft) từ Template, end-to-end có UI.
+Phase 2
+Tuần 3–4
+Vòng đời hợp đồng
+CRUD hợp đồng đầy đủ, State Machine, Upload file/versioning qua storage abstraction.
+Trình duyệt hợp đồng → người duyệt Approve/Reject, trạng thái cập nhật đúng State Machine.
+Phase 3
+Tuần 5–6
+Workflow, Ký số & AI
+Workflow config (Definition/Step), Ký điện tử Mock/OTP, tích hợp AI Contract Assistant (Extract/Summary/Risk) qua RabbitMQ.
+Approved → Ký (mock) → chuyển Active; upload hợp đồng → nhận kết quả phân tích AI cơ bản.
+Phase 4
+Tuần 7–8
+Dashboard, Audit, Đóng gói
+Báo cáo/Dashboard, Audit Trail, Notification (Hangfire + RabbitMQ), Docker Compose, Testing, cắt gọt theo Must/Should/Stretch.
+Toàn bộ vòng đời Draft → ... → Active → cảnh báo Expiring, xem trên Dashboard.
+10. Chiến lược kiểm thử
+Viết test xuyên suốt quá trình phát triển, không dồn vào cuối dự án — mỗi module khi hoàn thành phải có test kèm theo trước khi coi là "xong".
+Ưu tiên cao nhất: 
+State Machine hợp đồng, Approval Workflow, Authorization (RBAC), Integration Test với DB — đây là 4 nhóm ảnh hưởng trực tiếp đến tính đúng đắn nghiệp vụ và bảo mật, phải có test trước các phần khác.
+Unit Testing (xUnit + Moq): 
+Kiểm thử State Machine hợp đồng, quy tắc định tuyến duyệt theo giá trị hợp đồng.
+Integration Testing (Testcontainers): 
+Chạy container SQL Server thật (mcr.microsoft.com/mssql/server) để kiểm thử Query EF Core và luồng upload/versioning file.
+Security Testing: 
+Kiểm thử phân quyền RBAC — người không có quyền không thể xem/sửa hợp đồng ngoài phạm vi.
+AI Accuracy Testing: 
+Đối chiếu kết quả AI trích xuất (giá trị, ngày hết hạn) với bộ dữ liệu hợp đồng mẫu đã gán nhãn.
+Nếu phần lõi (core: Auth, Contract CRUD, State Machine, Approval Workflow) chưa ổn định, ưu tiên cắt các feature nâng cao (Stretch Goal) trước, thay vì tiếp tục thêm tính năng mới trong khi core còn lỗi.
+11. Đóng gói & triển khai
+Toàn bộ hệ thống được đóng gói bằng Docker Compose gồm các service: sqlserver-db, minio (lưu file — dev/local), rabbitmq (message broker), seq (log tập trung), contract-api, contract-frontend, và hangfire dashboard tích hợp trong contract-api.
+services:
+  sqlserver-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SecretPassword123!
+    ports: ["1433:1433"]
+  minio:
+    image: minio/minio
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports: ["5672:5672", "15672:15672"]
+  seq:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports: ["5341:80"]
+  contract-api:
+    build: ./src/Contract.Api
+    depends_on: [sqlserver-db, minio, rabbitmq, seq]
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver-db;Database=ContractDb;User Id=sa;Password=SecretPassword123!;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+      - Seq__ServerUrl=http://seq:80
+  contract-frontend:
+    build: ./frontend
+    depends_on: [contract-api]
+12. Phạm vi ưu tiên (Must Have / Should Have / Stretch Goal)
+Chốt rõ phạm vi để khi thời gian gấp, cả nhóm biết chính xác nên cắt phần nào trước, giữ phần nào bằng mọi giá.
+Nhóm
+Hạng mục
+Must Have
+Auth/RBAC · Contract CRUD + State Machine · Workflow (config + runtime) · E-signature Mock/OTP · Upload & storage abstraction · Hangfire cảnh báo hết hạn · Notification cơ bản · AI: Extract + Summary + Risk Analysis · Audit log · Unit/Integration test cho State Machine, Approval Workflow, Authorization
+Should Have
+Outbox Pattern & Idempotent Consumer đầy đủ cho RabbitMQ · Versioning Template & Workflow (snapshot) · Dashboard/báo cáo nâng cao · Health Check endpoint
+Stretch Goal
+Tích hợp thật VNPT-CA/VNeID · AI Q&A trên nội dung hợp đồng · AI so sánh 2 phiên bản hợp đồng · OpenTelemetry (tracing/metrics) · Tách module thành Microservices riêng (nếu sau này thực sự cần)
