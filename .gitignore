@@ -1,0 +1,21 @@
+# Visual Studio
+.vs/
+**/.vs/
+
+# .NET build
+bin/
+obj/
+**/bin/
+**/obj/
+
+# User-specific files
+*.user
+*.suo
+
+# Node
+node_modules/
+dist/
+
+# Environment files
+.env
+.env.*

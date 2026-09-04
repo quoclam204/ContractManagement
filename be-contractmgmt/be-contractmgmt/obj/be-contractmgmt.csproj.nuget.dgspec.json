@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj": {}
+    "e:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj": {}
   },
   "projects": {
-    "E:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj": {
+    "e:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj",
+        "projectUniqueName": "e:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj",
         "projectName": "be-contractmgmt",
-        "projectPath": "E:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj",
+        "projectPath": "e:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\be-contractmgmt.csproj",
         "packagesPath": "C:\\Users\\nguye\\.nuget\\packages\\",
-        "outputPath": "E:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\obj\\",
+        "outputPath": "e:\\INTERN .NET\\ContractManagement\\be-contractmgmt\\be-contractmgmt\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -49,6 +49,22 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.*, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.*, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.6.2, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -60,6 +76,32 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.30, 8.0.30]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.30, 8.0.30]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.30, 8.0.30]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.30, 8.0.30]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.317/PortableRuntimeIdentifierGraph.json"
         }
       }

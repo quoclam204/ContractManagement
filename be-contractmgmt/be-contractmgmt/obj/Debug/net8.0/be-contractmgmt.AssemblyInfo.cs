@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("be-contractmgmt")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4eaff73a41abea6d72ef5a7c1f6b0f969dad4d0a")]
 [assembly: System.Reflection.AssemblyProductAttribute("be-contractmgmt")]
 [assembly: System.Reflection.AssemblyTitleAttribute("be-contractmgmt")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
