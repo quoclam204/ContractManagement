@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { contractApi } from '../services/contractApi';
 import type { ContractType, TemplateVersion, ContractDetail } from '../types';
-import {
-  IconFileText,
-  IconSend,
-  IconBuilding,
-  IconCalendar,
-  IconEye,
-  IconAlertCircle
-} from './Icons';
+import { IconSend } from './Icons';
 
 interface Props {
   selectedTemplate?: TemplateVersion | null;
@@ -22,10 +15,10 @@ export const ContractDraftForm: React.FC<Props> = ({ selectedTemplate, onSuccess
   const templateVersionId = selectedTemplate?.id || '';
 
   const [title, setTitle] = useState<string>(
-    selectedTemplate ? `Hợp đồng ${selectedTemplate.contractTypeName}` : 'Hợp đồng Cung cấp Dịch vụ Phần mềm CLM'
+    selectedTemplate ? `Hợp đồng ${selectedTemplate.contractTypeName}` : ''
   );
-  const [partnerName, setPartnerName] = useState<string>('Công ty TNHH Giải Pháp Công Nghệ Toàn Cầu');
-  const [value, setValue] = useState<number>(150000000);
+  const [partnerName, setPartnerName] = useState<string>('');
+  const [value, setValue] = useState<number>(100000000);
   const [effectiveDate, setEffectiveDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [expiryDate, setExpiryDate] = useState<string>(
     new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -43,20 +36,9 @@ export const ContractDraftForm: React.FC<Props> = ({ selectedTemplate, onSuccess
     });
   }, []);
 
-  const selectedTypeName = types.find((t) => t.id === contractTypeId)?.name || selectedTemplate?.contractTypeName || 'Hợp đồng';
-
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+    return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
   };
-
-  const calculateDays = () => {
-    const start = new Date(effectiveDate);
-    const end = new Date(expiryDate);
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
-    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  };
-
-  const daysTotal = calculateDays();
 
   const handleSave = async (submitAfterCreate: boolean) => {
     setError(null);
@@ -89,7 +71,6 @@ export const ContractDraftForm: React.FC<Props> = ({ selectedTemplate, onSuccess
       });
 
       if (submitAfterCreate) {
-        // Automatically submit for approval
         await contractApi.submitForApproval(newContract.id);
         const refreshed = await contractApi.getContractById(newContract.id);
         onSuccess(refreshed);
@@ -104,226 +85,123 @@ export const ContractDraftForm: React.FC<Props> = ({ selectedTemplate, onSuccess
   };
 
   return (
-    <div>
-      {error && (
-        <div className="clm-alert clm-alert-error">
-          <IconAlertCircle size={18} />
-          <span>{error}</span>
+    <div className="form-card">
+      <div style={{ marginBottom: 20 }}>
+        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+          {selectedTemplate ? `Tạo hợp đồng theo mẫu: ${selectedTemplate.contractTypeName}` : 'Soạn thảo hợp đồng mới'}
+        </h2>
+        <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-muted)' }}>
+          Nhập các thông số cơ bản để khởi tạo hợp đồng vào hệ thống.
+        </p>
+      </div>
+
+      {error && <div className="alert alert-error">{error}</div>}
+
+      <div className="form-group">
+        <label className="form-label">Phân loại hợp đồng *</label>
+        <select
+          className="form-select"
+          value={contractTypeId}
+          onChange={(e) => setContractTypeId(e.target.value)}
+        >
+          {types.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Tiêu đề hợp đồng *</label>
+        <input
+          type="text"
+          className="form-input"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Nhập tiêu đề hợp đồng..."
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Tên đối tác (Bên B)</label>
+        <input
+          type="text"
+          className="form-input"
+          value={partnerName}
+          onChange={(e) => setPartnerName(e.target.value)}
+          placeholder="Nhập tên công ty hoặc tổ chức đối tác..."
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Giá trị hợp đồng (VNĐ) *</label>
+        <input
+          type="number"
+          step="1000000"
+          className="form-input"
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+        />
+        <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>
+          Tương đương: <strong>{formatCurrency(value)}</strong>
         </div>
-      )}
+      </div>
 
-      {/* 2-Column Studio: Form Left + Live Document Preview Right */}
-      <div className="clm-studio-grid">
-        {/* Left Form */}
-        <div className="clm-panel">
-          <div className="clm-panel-header">
-            <h3 className="clm-panel-title">Soạn Thảo Hợp Đồng (Bản Nháp)</h3>
-            <p className="clm-panel-desc">
-              Nhập các trường thông tin pháp lý, đối tác và giá trị theo chuẩn quy định của doanh nghiệp.
-            </p>
-          </div>
-
-          <div className="clm-panel-body">
-            <div className="clm-form-section-title">
-              <IconFileText size={14} color="#2563eb" />
-              <span>1. Định danh & Phân loại hợp đồng</span>
-            </div>
-
-            <div className="clm-form-group">
-              <label className="clm-form-label">Phân loại hợp đồng *</label>
-              <select
-                className="clm-form-select"
-                value={contractTypeId}
-                onChange={(e) => setContractTypeId(e.target.value)}
-              >
-                {types.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="clm-form-group">
-              <label className="clm-form-label">Tiêu đề hợp đồng *</label>
-              <input
-                type="text"
-                className="clm-form-input"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="VD: Hợp đồng cung cấp dịch vụ hạ tầng đám mây..."
-              />
-            </div>
-
-            <div className="clm-form-section-title">
-              <IconBuilding size={14} color="#2563eb" />
-              <span>2. Đối tác giao dịch (Bên B)</span>
-            </div>
-
-            <div className="clm-form-group">
-              <label className="clm-form-label">Tên đầy đủ của Đối tác (Bên B) *</label>
-              <input
-                type="text"
-                className="clm-form-input"
-                value={partnerName}
-                onChange={(e) => setPartnerName(e.target.value)}
-                placeholder="VD: Công ty TNHH Phát triển Phần mềm ABC"
-              />
-            </div>
-
-            <div className="clm-form-section-title">
-              <IconCalendar size={14} color="#2563eb" />
-              <span>3. Giá trị cam kết & Thời hạn hiệu lực</span>
-            </div>
-
-            <div className="clm-form-group">
-              <label className="clm-form-label">Giá trị hợp đồng (VNĐ) *</label>
-              <input
-                type="number"
-                step="1000000"
-                className="clm-form-input"
-                value={value}
-                onChange={(e) => setValue(Number(e.target.value))}
-              />
-              <div style={{ fontSize: 11, color: '#059669', fontWeight: 600, marginTop: 4 }}>
-                Bằng chữ / Quy đổi: {formatCurrency(value)}
-              </div>
-            </div>
-
-            <div className="clm-form-grid-2">
-              <div className="clm-form-group">
-                <label className="clm-form-label">Ngày bắt đầu hiệu lực *</label>
-                <input
-                  type="date"
-                  className="clm-form-input"
-                  value={effectiveDate}
-                  onChange={(e) => setEffectiveDate(e.target.value)}
-                />
-              </div>
-
-              <div className="clm-form-group">
-                <label className="clm-form-label">Ngày đáo hạn / kết thúc *</label>
-                <input
-                  type="date"
-                  className="clm-form-input"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div style={{ fontSize: 12, color: 'var(--clm-slate-500)', background: 'var(--clm-slate-50)', padding: '8px 12px', borderRadius: 4, border: '1px solid var(--clm-slate-200)', marginBottom: 14 }}>
-              Tổng thời gian thực thi cam kết: <strong>{daysTotal} ngày</strong>.
-            </div>
-
-            <div className="clm-form-group">
-              <label className="clm-form-label">Đường dẫn tài liệu đính kèm (File URL)</label>
-              <input
-                type="text"
-                className="clm-form-input"
-                value={fileUrl}
-                onChange={(e) => setFileUrl(e.target.value)}
-                placeholder="https://storage.enterprise.corp/contracts/draft_scan.pdf"
-              />
-            </div>
-          </div>
-
-          <div className="clm-panel-footer">
-            <button type="button" className="clm-btn clm-btn-outline" onClick={onCancel}>
-              Hủy bỏ
-            </button>
-            <button
-              type="button"
-              className="clm-btn clm-btn-outline"
-              disabled={loading}
-              onClick={() => handleSave(false)}
-            >
-              Lưu bản nháp (Draft)
-            </button>
-            <button
-              type="button"
-              className="clm-btn clm-btn-primary"
-              disabled={loading}
-              onClick={() => handleSave(true)}
-            >
-              <IconSend size={14} />
-              <span>{loading ? 'Đang lưu...' : 'Lưu & Trình duyệt ngay'}</span>
-            </button>
-          </div>
+      <div className="form-grid-2">
+        <div className="form-group">
+          <label className="form-label">Ngày hiệu lực *</label>
+          <input
+            type="date"
+            className="form-input"
+            value={effectiveDate}
+            onChange={(e) => setEffectiveDate(e.target.value)}
+          />
         </div>
 
-        {/* Right Side: LIVE DOCUMENT PREVIEW */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--clm-slate-700)', textTransform: 'uppercase' }}>
-              <IconEye size={14} color="#2563eb" />
-              <span>Xem trước văn bản thời gian thực (Live Preview)</span>
-            </div>
-            <span style={{ fontSize: 11, color: '#059669', background: '#ecfdf5', padding: '2px 8px', borderRadius: 9999, fontWeight: 600 }}>
-              ● Tự động đồng bộ
-            </span>
-          </div>
-
-          <div className="clm-doc-preview-wrapper">
-            <div className="clm-doc-paper">
-              <div className="clm-doc-official-header">
-                <p className="clm-doc-republic">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
-                <p className="clm-doc-motto">Độc lập - Tự do - Hạnh phúc</p>
-                <div className="clm-doc-line" />
-              </div>
-
-              <div className="clm-doc-title">
-                {title || '[TIÊU ĐỀ HỢP ĐỒNG]'}
-              </div>
-              <div className="clm-doc-code">
-                Mã dự kiến: <strong>HD-{new Date().getFullYear()}{String(new Date().getMonth() + 1).padStart(2, '0')}-XXXX</strong> • Phân loại: {selectedTypeName}
-              </div>
-
-              <p style={{ margin: '14px 0 8px' }}>
-                Hôm nay, ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}, chúng tôi gồm các bên:
-              </p>
-
-              <div className="clm-doc-section-head">BÊN A (BÊN SỬ DỤNG DỊCH VỤ):</div>
-              <div style={{ paddingLeft: 12, borderLeft: '2px solid var(--clm-slate-200)', marginBottom: 10 }}>
-                <div><strong>CÔNG TY CỔ PHẦN CÔNG NGHỆ DOANH NGHIỆP VIỆT NAM</strong></div>
-                <div>Đại diện: Ban Giám Đốc • Mã số thuế: 0102030405</div>
-              </div>
-
-              <div className="clm-doc-section-head">BÊN B (ĐỐI TÁC THỰC HIỆN):</div>
-              <div style={{ paddingLeft: 12, borderLeft: '2px solid var(--clm-primary)', marginBottom: 14 }}>
-                <div>Tên đối tác: <span className="clm-doc-highlight">{partnerName || '[Chưa nhập Bên B]'}</span></div>
-                <div>Đại diện: Giám đốc điều hành</div>
-              </div>
-
-              <div className="clm-doc-section-head">ĐIỀU 1: GIÁ TRỊ VÀ PHƯƠNG THỨC THANH TOÁN</div>
-              <p style={{ margin: '4px 0 10px' }}>
-                Tổng giá trị hợp đồng được hai bên thống nhất là:{' '}
-                <span className="clm-doc-highlight" style={{ background: '#bbf7d0', color: '#166534' }}>
-                  {formatCurrency(value)}
-                </span>
-                .
-              </p>
-
-              <div className="clm-doc-section-head">ĐIỀU 2: THỜI HẠN HIỆU LỰC</div>
-              <p style={{ margin: '4px 0 14px' }}>
-                Hợp đồng có hiệu lực từ ngày <strong>{new Date(effectiveDate).toLocaleDateString('vi-VN')}</strong> đến hết ngày <strong>{new Date(expiryDate).toLocaleDateString('vi-VN')}</strong> (thời hạn {daysTotal} ngày).
-              </p>
-
-              <div style={{ marginTop: 28, display: 'flex', justifyContent: 'space-between', textAlign: 'center', paddingTop: 14, borderTop: '1px dashed var(--clm-slate-200)' }}>
-                <div style={{ width: '45%' }}>
-                  <strong>ĐẠI DIỆN BÊN A</strong>
-                  <div style={{ height: 40 }} />
-                  <div style={{ fontSize: 11, color: 'var(--clm-slate-400)' }}>(Ký và ghi rõ họ tên)</div>
-                </div>
-                <div style={{ width: '45%' }}>
-                  <strong>ĐẠI DIỆN BÊN B</strong>
-                  <div style={{ height: 40 }} />
-                  <div style={{ fontSize: 11, color: 'var(--clm-slate-400)' }}>(Ký và ghi rõ họ tên)</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="form-group">
+          <label className="form-label">Ngày hết hạn *</label>
+          <input
+            type="date"
+            className="form-input"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+          />
         </div>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Đường dẫn tệp đính kèm (nếu có)</label>
+        <input
+          type="text"
+          className="form-input"
+          value={fileUrl}
+          onChange={(e) => setFileUrl(e.target.value)}
+          placeholder="https://..."
+        />
+      </div>
+
+      <div className="form-actions">
+        <button type="button" className="btn btn-outline" onClick={onCancel}>
+          Hủy bỏ
+        </button>
+        <button
+          type="button"
+          className="btn btn-outline"
+          disabled={loading}
+          onClick={() => handleSave(false)}
+        >
+          Lưu bản nháp
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={loading}
+          onClick={() => handleSave(true)}
+        >
+          <IconSend size={13} />
+          <span>{loading ? 'Đang lưu...' : 'Lưu & Trình duyệt'}</span>
+        </button>
       </div>
     </div>
   );

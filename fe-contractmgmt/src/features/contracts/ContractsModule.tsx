@@ -7,15 +7,7 @@ import { ContractDetailView } from './components/ContractDetailView';
 import type { TemplateVersion, ContractDetail, ContractListItem } from './types';
 import { ContractStatus } from './types';
 import { contractApi } from './services/contractApi';
-import {
-  IconShield,
-  IconFileText,
-  IconPlus,
-  IconClock,
-  IconCheckCircle,
-  IconTrendingUp,
-  IconTemplate
-} from './components/Icons';
+import { IconPlus } from './components/Icons';
 
 type ViewMode = 'list' | 'create' | 'templates' | 'detail';
 
@@ -46,12 +38,12 @@ export const ContractsModule: React.FC = () => {
 
   const formatCurrencyCompact = (val: number) => {
     if (val >= 1_000_000_000) {
-      return (val / 1_000_000_000).toFixed(2) + ' tỷ VNĐ';
+      return (val / 1_000_000_000).toFixed(1) + ' tỷ ₫';
     }
     if (val >= 1_000_000) {
-      return (val / 1_000_000).toFixed(1) + ' triệu VNĐ';
+      return (val / 1_000_000).toFixed(0) + ' triệu ₫';
     }
-    return new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ';
+    return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
   };
 
   const handleSelectTemplate = (template: TemplateVersion) => {
@@ -66,7 +58,7 @@ export const ContractsModule: React.FC = () => {
       setCurrentContract(detail);
       setViewMode('detail');
     } catch (err: any) {
-      alert(err.message || 'Không thể lấy thông tin chi tiết hợp đồng.');
+      alert(err.message || 'Không thể lấy thông tin hợp đồng.');
     } finally {
       setLoadingDetail(false);
     }
@@ -79,200 +71,144 @@ export const ContractsModule: React.FC = () => {
   };
 
   return (
-    <div className="clm-shell">
-      {/* Enterprise Executive Header */}
-      <header className="clm-header">
-        <div className="clm-brand-wrap">
-          <div className="clm-brand-icon">
-            <IconShield size={20} color="#ffffff" />
-          </div>
-          <div>
-            <div className="clm-brand-title">
-              <span>CLM ENTERPRISE</span>
-              <span className="clm-badge-version">v1.0 • Person 2</span>
-            </div>
-            <div className="clm-brand-subtitle">
-              Quản lý vòng đời hợp đồng, mẫu văn bản & trạng thái State Machine
-            </div>
-          </div>
+    <div className="app-container">
+      {/* Clean Header */}
+      <div className="app-header">
+        <div className="app-title-group">
+          <h1>Quản Lý Hợp Đồng</h1>
+          <p>Hệ thống quản lý vòng đời hợp đồng và mẫu văn bản</p>
         </div>
 
-        <div className="clm-header-right">
-          <div className="clm-db-status">
-            <span className="clm-db-dot" />
-            <span>SQL Server: Kết nối ổn định</span>
-          </div>
-
-          <div className="clm-user-chip">
-            <div className="clm-user-avatar">P2</div>
-            <div className="clm-user-info">
-              <div className="clm-user-name">Người Số 2</div>
-              <div className="clm-user-role">Chuyên viên Hợp đồng & Pháp chế</div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Workspace */}
-      <main className="clm-main">
-        {/* Page Title & Quick Action */}
-        <div className="clm-page-header">
-          <div className="clm-page-title-group">
-            <h1>Trung Tâm Quản Trị Hợp Đồng</h1>
-            <p className="clm-page-desc">
-              Theo dõi toàn diện tiến trình thẩm định, ký duyệt, hiệu lực và lưu trữ văn bản pháp lý doanh nghiệp.
-            </p>
-          </div>
-
+        {viewMode !== 'create' && (
           <button
             type="button"
-            className="clm-btn clm-btn-primary"
+            className="btn btn-primary"
             onClick={() => {
               setSelectedTemplate(null);
               setViewMode('create');
             }}
           >
-            <IconPlus size={15} />
-            <span>Soạn Hợp Đồng Mới</span>
+            <IconPlus size={14} />
+            <span>Tạo hợp đồng</span>
           </button>
-        </div>
-
-        {/* Executive KPI Stats Strip */}
-        <div className="clm-kpi-grid">
-          <div className="clm-kpi-card">
-            <div>
-              <div className="clm-kpi-label">Tổng số hợp đồng</div>
-              <div className="clm-kpi-number">{totalContracts}</div>
-              <div className="clm-kpi-sub">Toàn bộ hồ sơ trên hệ thống</div>
-            </div>
-            <div className="clm-kpi-icon-pill" style={{ background: 'var(--clm-slate-100)', color: 'var(--clm-slate-700)' }}>
-              <IconFileText size={22} />
-            </div>
-          </div>
-
-          <div className="clm-kpi-card">
-            <div>
-              <div className="clm-kpi-label">Chờ thẩm định & duyệt</div>
-              <div className="clm-kpi-number" style={{ color: '#d97706' }}>
-                {pendingCount}
-              </div>
-              <div className="clm-kpi-sub">Cần cấp quản lý xem xét</div>
-            </div>
-            <div className="clm-kpi-icon-pill" style={{ background: '#fffbeb', color: '#d97706' }}>
-              <IconClock size={22} />
-            </div>
-          </div>
-
-          <div className="clm-kpi-card">
-            <div>
-              <div className="clm-kpi-label">Đang có hiệu lực</div>
-              <div className="clm-kpi-number" style={{ color: '#059669' }}>
-                {activeCount}
-              </div>
-              <div className="clm-kpi-sub">Đang thực thi cam kết</div>
-            </div>
-            <div className="clm-kpi-icon-pill" style={{ background: '#ecfdf5', color: '#059669' }}>
-              <IconCheckCircle size={22} />
-            </div>
-          </div>
-
-          <div className="clm-kpi-card">
-            <div>
-              <div className="clm-kpi-label">Tổng giá trị cam kết</div>
-              <div className="clm-kpi-number" style={{ fontSize: 20, color: 'var(--clm-slate-900)' }}>
-                {formatCurrencyCompact(totalValue)}
-              </div>
-              <div className="clm-kpi-sub">Quy mô tài chính cam kết</div>
-            </div>
-            <div className="clm-kpi-icon-pill" style={{ background: '#eff6ff', color: '#2563eb' }}>
-              <IconTrendingUp size={22} />
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs Bar */}
-        <div className="clm-tab-nav">
-          <div className="clm-tabs-left">
-            <button
-              type="button"
-              className={`clm-tab-item ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              <IconFileText size={15} />
-              <span>Danh sách hợp đồng</span>
-              <span className="clm-tab-badge">{totalContracts}</span>
-            </button>
-
-            <button
-              type="button"
-              className={`clm-tab-item ${viewMode === 'templates' ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedTemplate(null);
-                setViewMode('templates');
-              }}
-            >
-              <IconTemplate size={15} />
-              <span>Kho mẫu văn bản (Templates)</span>
-            </button>
-
-            <button
-              type="button"
-              className={`clm-tab-item ${viewMode === 'create' ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedTemplate(null);
-                setViewMode('create');
-              }}
-            >
-              <IconPlus size={14} />
-              <span>Soạn thảo hợp đồng mới</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Content Views */}
-        {viewMode === 'list' && (
-          <ContractList
-            onSelectContract={handleSelectContract}
-            onCreateNew={() => {
-              setSelectedTemplate(null);
-              setViewMode('create');
-            }}
-          />
         )}
+      </div>
 
-        {viewMode === 'templates' && (
-          <TemplateList onSelectTemplate={handleSelectTemplate} />
-        )}
+      {/* Slim Metrics Strip */}
+      <div className="stats-strip">
+        <div className="stat-box">
+          <div>
+            <div className="stat-label">Tổng hợp đồng</div>
+            <div className="stat-value">{totalContracts}</div>
+          </div>
+        </div>
+
+        <div className="stat-box">
+          <div>
+            <div className="stat-label">Chờ phê duyệt</div>
+            <div className="stat-value" style={{ color: '#d97706' }}>
+              {pendingCount}
+            </div>
+          </div>
+        </div>
+
+        <div className="stat-box">
+          <div>
+            <div className="stat-label">Đang hiệu lực</div>
+            <div className="stat-value" style={{ color: '#16a34a' }}>
+              {activeCount}
+            </div>
+          </div>
+        </div>
+
+        <div className="stat-box">
+          <div>
+            <div className="stat-label">Tổng giá trị</div>
+            <div className="stat-value">
+              {formatCurrencyCompact(totalValue)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="tabs-nav">
+        <button
+          type="button"
+          className={`tab-btn ${viewMode === 'list' ? 'active' : ''}`}
+          onClick={() => setViewMode('list')}
+        >
+          <span>Danh sách hợp đồng</span>
+          <span className="tab-counter">{totalContracts}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`tab-btn ${viewMode === 'templates' ? 'active' : ''}`}
+          onClick={() => {
+            setSelectedTemplate(null);
+            setViewMode('templates');
+          }}
+        >
+          <span>Mẫu văn bản</span>
+        </button>
 
         {viewMode === 'create' && (
-          <ContractDraftForm
-            selectedTemplate={selectedTemplate}
-            onSuccess={handleCreateSuccess}
-            onCancel={() => setViewMode('list')}
-          />
+          <button type="button" className="tab-btn active">
+            <span>Tạo mới</span>
+          </button>
         )}
 
         {viewMode === 'detail' && (
-          <>
-            {loadingDetail ? (
-              <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--clm-slate-500)', fontSize: 13 }}>
-                Đang truy xuất thông tin chi tiết hợp đồng...
-              </div>
-            ) : currentContract ? (
-              <ContractDetailView
-                contract={currentContract}
-                onBack={() => setViewMode('list')}
-                onRefresh={(updated) => {
-                  setCurrentContract(updated);
-                  loadStats();
-                }}
-              />
-            ) : (
-              <div className="clm-alert clm-alert-error">Không tìm thấy thông tin hợp đồng.</div>
-            )}
-          </>
+          <button type="button" className="tab-btn active">
+            <span>Chi tiết hợp đồng</span>
+          </button>
         )}
-      </main>
+      </div>
+
+      {/* Content */}
+      {viewMode === 'list' && (
+        <ContractList
+          onSelectContract={handleSelectContract}
+          onCreateNew={() => {
+            setSelectedTemplate(null);
+            setViewMode('create');
+          }}
+        />
+      )}
+
+      {viewMode === 'templates' && (
+        <TemplateList onSelectTemplate={handleSelectTemplate} />
+      )}
+
+      {viewMode === 'create' && (
+        <ContractDraftForm
+          selectedTemplate={selectedTemplate}
+          onSuccess={handleCreateSuccess}
+          onCancel={() => setViewMode('list')}
+        />
+      )}
+
+      {viewMode === 'detail' && (
+        <>
+          {loadingDetail ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13 }}>
+              Đang tải chi tiết hợp đồng...
+            </div>
+          ) : currentContract ? (
+            <ContractDetailView
+              contract={currentContract}
+              onBack={() => setViewMode('list')}
+              onRefresh={(updated) => {
+                setCurrentContract(updated);
+                loadStats();
+              }}
+            />
+          ) : (
+            <div className="alert alert-error">Không tìm thấy thông tin hợp đồng.</div>
+          )}
+        </>
+      )}
     </div>
   );
 };

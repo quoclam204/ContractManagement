@@ -7,12 +7,9 @@ import {
   IconSearch,
   IconRefresh,
   IconPlus,
-  IconFileText,
   IconCopy,
   IconCheck,
-  IconDownload,
-  IconBuilding,
-  IconCalendar
+  IconDownload
 } from './Icons';
 
 interface Props {
@@ -57,29 +54,20 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
     e.stopPropagation();
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 1800);
+    setTimeout(() => setCopiedId(null), 1500);
   };
 
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+    return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
   };
 
-  const calculateDaysRemaining = (expiryDate: string) => {
-    const end = new Date(expiryDate);
-    const now = new Date();
-    const diffTime = end.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  // Export to CSV with UTF-8 BOM for Microsoft Excel compatibility
   const handleExportCSV = () => {
     if (contracts.length === 0) {
       alert('Không có dữ liệu để xuất file.');
       return;
     }
 
-    const headers = ['Mã Hợp Đồng', 'Tiêu Đề', 'Đối Tác', 'Loại Hợp Đồng', 'Giá Trị (VNĐ)', 'Ngày Hiệu Lực', 'Ngày Hết Hạn', 'Trạng Thái'];
+    const headers = ['Số Hợp Đồng', 'Tiêu Đề', 'Đối Tác', 'Loại HĐ', 'Giá Trị (VNĐ)', 'Ngày Hiệu Lực', 'Ngày Hết Hạn', 'Trạng Thái'];
     const rows = contracts.map((c) => [
       `"${c.contractNumber}"`,
       `"${c.title.replace(/"/g, '""')}"`,
@@ -96,7 +84,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Danh_Sach_Hop_Dong_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `Danh_sach_hop_dong_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -104,203 +92,158 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
 
   return (
     <div>
-      <div className="clm-table-container">
-        {/* Filter and Command Bar */}
-        <div className="clm-filter-bar">
-          <form onSubmit={handleSearchSubmit} className="clm-search-box">
-            <IconSearch size={15} color="#94a3b8" />
+      {/* 1-Row Filter Bar */}
+      <div className="filter-row">
+        <div className="filter-left">
+          <form onSubmit={handleSearchSubmit} className="search-input-wrap">
+            <span className="search-icon">
+              <IconSearch size={14} />
+            </span>
             <input
               type="text"
-              className="clm-search-input"
+              className="search-input"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm theo số HĐ, tiêu đề hoặc đối tác..."
             />
           </form>
 
-          {/* Quick Filter Chips */}
-          <div className="clm-quick-filters">
-            <button
-              type="button"
-              className={`clm-filter-chip ${statusFilter === '' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('')}
-            >
-              Tất cả
-            </button>
-            <button
-              type="button"
-              className={`clm-filter-chip ${statusFilter === String(ContractStatus.Draft) ? 'active' : ''}`}
-              onClick={() => setStatusFilter(String(ContractStatus.Draft))}
-            >
-              Bản nháp
-            </button>
-            <button
-              type="button"
-              className={`clm-filter-chip ${statusFilter === String(ContractStatus.PendingApproval) ? 'active' : ''}`}
-              onClick={() => setStatusFilter(String(ContractStatus.PendingApproval))}
-            >
-              Chờ phê duyệt
-            </button>
-            <button
-              type="button"
-              className={`clm-filter-chip ${statusFilter === String(ContractStatus.Active) ? 'active' : ''}`}
-              onClick={() => setStatusFilter(String(ContractStatus.Active))}
-            >
-              Đang hiệu lực
-            </button>
-            <button
-              type="button"
-              className={`clm-filter-chip ${statusFilter === String(ContractStatus.Terminated) ? 'active' : ''}`}
-              onClick={() => setStatusFilter(String(ContractStatus.Terminated))}
-            >
-              Đã thanh lý
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button className="clm-btn clm-btn-outline clm-btn-sm" onClick={handleExportCSV} title="Xuất file Excel CSV">
-              <IconDownload size={14} />
-              <span>Xuất CSV</span>
-            </button>
-
-            <button className="clm-btn clm-btn-outline clm-btn-sm" onClick={fetchContracts} title="Làm mới danh sách">
-              <IconRefresh size={14} />
-              <span>Làm mới</span>
-            </button>
-
-            <button className="clm-btn clm-btn-primary clm-btn-sm" onClick={onCreateNew}>
-              <IconPlus size={14} />
-              <span>Tạo hợp đồng</span>
-            </button>
-          </div>
+          <select
+            className="status-dropdown"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value={ContractStatus.Draft}>Bản nháp</option>
+            <option value={ContractStatus.PendingApproval}>Chờ phê duyệt</option>
+            <option value={ContractStatus.Approved}>Đã duyệt</option>
+            <option value={ContractStatus.Signed}>Đã ký</option>
+            <option value={ContractStatus.Active}>Đang hiệu lực</option>
+            <option value={ContractStatus.Expiring}>Sắp hết hạn</option>
+            <option value={ContractStatus.Terminated}>Đã thanh lý</option>
+          </select>
         </div>
 
-        {error && <div className="clm-alert clm-alert-error">{error}</div>}
+        <div className="filter-right">
+          <button type="button" className="btn btn-outline btn-sm" onClick={handleExportCSV} title="Xuất file CSV">
+            <IconDownload size={13} />
+            <span>Xuất CSV</span>
+          </button>
+          <button type="button" className="btn btn-outline btn-sm" onClick={fetchContracts} title="Làm mới">
+            <IconRefresh size={13} />
+            <span>Làm mới</span>
+          </button>
+        </div>
+      </div>
 
+      {error && <div className="alert alert-error">{error}</div>}
+
+      <div className="table-card">
         {loading ? (
-          <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--clm-slate-500)', fontSize: 13 }}>
-            <div style={{ marginBottom: 8 }}>Đang truy vấn cơ sở dữ liệu hợp đồng...</div>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13 }}>
+            Đang tải dữ liệu hợp đồng...
           </div>
         ) : contracts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 20px' }}>
-            <div style={{ color: 'var(--clm-slate-300)', marginBottom: 14 }}>
-              <IconFileText size={48} />
-            </div>
-            <h4 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700, color: 'var(--clm-slate-900)' }}>
-              Không tìm thấy hợp đồng nào
-            </h4>
-            <p style={{ color: 'var(--clm-slate-500)', margin: '0 0 18px', fontSize: 13, maxWidth: 400, marginLeft: 'auto', marginRight: 'auto' }}>
-              Chưa có dữ liệu nào khớp với tiêu chí tìm kiếm hoặc trạng thái lọc đã chọn.
+          <div style={{ padding: '48px 20px', textAlign: 'center' }}>
+            <p style={{ margin: '0 0 12px', color: 'var(--color-text-muted)', fontSize: 13 }}>
+              Không tìm thấy hợp đồng nào phù hợp.
             </p>
-            <button className="clm-btn clm-btn-primary" onClick={onCreateNew}>
-              <IconPlus size={15} />
-              <span>Khởi tạo hợp đồng mới</span>
+            <button type="button" className="btn btn-primary btn-sm" onClick={onCreateNew}>
+              <IconPlus size={13} />
+              <span>Tạo hợp đồng mới</span>
             </button>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="clm-data-table">
-              <thead>
-                <tr>
-                  <th style={{ width: 160 }}>Số Hợp Đồng</th>
-                  <th>Tiêu Đề & Đối Tác (Bên B)</th>
-                  <th style={{ width: 150 }}>Phân Loại HĐ</th>
-                  <th style={{ width: 150, textAlign: 'right' }}>Giá Trị Hợp Đồng</th>
-                  <th style={{ width: 190 }}>Thời Hạn Hiệu Lực</th>
-                  <th style={{ width: 140 }}>Trạng Thái</th>
-                  <th style={{ width: 110, textAlign: 'right' }}>Thao Tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {contracts.map((c) => {
-                  const daysLeft = calculateDaysRemaining(c.expiryDate);
-                  const isCopied = copiedId === c.id;
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th style={{ width: 160 }}>Số Hợp Đồng</th>
+                <th>Tiêu Đề Hợp Đồng</th>
+                <th>Đối Tác</th>
+                <th>Phân Loại</th>
+                <th style={{ textAlign: 'right' }}>Giá Trị</th>
+                <th>Thời Hạn</th>
+                <th>Trạng Thái</th>
+                <th style={{ width: 80, textAlign: 'right' }}>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contracts.map((c) => {
+                const isCopied = copiedId === c.id;
 
-                  return (
-                    <tr
-                      key={c.id}
-                      onClick={() => onSelectContract(c.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td>
-                        <div className="clm-code-pill" title="Click icon để copy">
-                          <span>{c.contractNumber}</span>
-                          <button
-                            type="button"
-                            className="clm-btn-copy"
-                            onClick={(e) => handleCopy(e, c.contractNumber, c.id)}
-                            title="Sao chép số hợp đồng"
-                          >
-                            {isCopied ? <IconCheck size={13} color="#059669" /> : <IconCopy size={13} />}
-                          </button>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div style={{ fontWeight: 700, color: 'var(--clm-slate-900)', fontSize: 13, marginBottom: 3 }}>
-                          {c.title}
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--clm-slate-500)' }}>
-                          <IconBuilding size={13} color="#64748b" />
-                          <span>{c.partnerName || 'Chưa định danh đối tác'}</span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--clm-slate-700)' }}>
-                          {c.contractTypeName}
-                        </span>
-                      </td>
-
-                      <td style={{ textAlign: 'right' }}>
-                        <span style={{ fontFamily: 'var(--clm-font-mono)', fontWeight: 700, color: 'var(--clm-slate-900)', fontSize: 13 }}>
-                          {formatCurrency(c.value)}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--clm-slate-700)' }}>
-                          <IconCalendar size={13} color="#64748b" />
-                          <span>
-                            {new Date(c.effectiveDate).toLocaleDateString('vi-VN')} → {new Date(c.expiryDate).toLocaleDateString('vi-VN')}
-                          </span>
-                        </div>
-                        <div style={{ fontSize: 11, color: daysLeft > 30 ? 'var(--clm-slate-400)' : '#d97706', marginTop: 2 }}>
-                          {daysLeft > 0 ? `Còn ${daysLeft} ngày` : 'Đã hết hạn'}
-                        </div>
-                      </td>
-
-                      <td>
-                        <ContractBadge status={c.status} />
-                      </td>
-
-                      <td style={{ textAlign: 'right' }}>
+                return (
+                  <tr
+                    key={c.id}
+                    onClick={() => onSelectContract(c.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td>
+                      <span className="code-tag" title="Click để sao chép">
+                        {c.contractNumber}
                         <button
-                          className="clm-btn clm-btn-outline clm-btn-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectContract(c.id);
-                          }}
+                          type="button"
+                          className="btn-copy-code"
+                          onClick={(e) => handleCopy(e, c.contractNumber, c.id)}
+                          title="Sao chép số hợp đồng"
                         >
-                          Chi tiết
+                          {isCopied ? <IconCheck size={12} color="#10b981" /> : <IconCopy size={12} />}
                         </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </span>
+                    </td>
+
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                        {c.title}
+                      </div>
+                    </td>
+
+                    <td>
+                      <span style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>
+                        {c.partnerName || '—'}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>
+                        {c.contractTypeName}
+                      </span>
+                    </td>
+
+                    <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                      {formatCurrency(c.value)}
+                    </td>
+
+                    <td style={{ fontSize: 12, color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
+                      {new Date(c.effectiveDate).toLocaleDateString('vi-VN')} – {new Date(c.expiryDate).toLocaleDateString('vi-VN')}
+                    </td>
+
+                    <td>
+                      <ContractBadge status={c.status} />
+                    </td>
+
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectContract(c.id);
+                        }}
+                      >
+                        Chi tiết
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
 
-        {/* Table Footer */}
-        <div className="clm-table-footer">
-          <div>
-            Tổng số: <strong>{contracts.length}</strong> hợp đồng trong hệ thống
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>Đang xem trang 1 / 1</span>
-          </div>
+        {/* Footer info */}
+        <div className="table-footer">
+          <span>Tổng số: <strong>{contracts.length}</strong> hợp đồng</span>
+          <span>Trang 1 / 1</span>
         </div>
       </div>
     </div>

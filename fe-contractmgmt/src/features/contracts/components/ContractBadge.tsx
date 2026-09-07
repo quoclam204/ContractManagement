@@ -15,29 +15,29 @@ export const ContractBadge: React.FC<Props> = ({ status }) => {
   const getStatusClass = (st: ContractStatus) => {
     switch (st) {
       case ContractStatus.Draft:
-        return 'clm-badge-draft';
+        return 'draft';
       case ContractStatus.PendingApproval:
-        return 'clm-badge-pending';
+        return 'pending';
       case ContractStatus.Approved:
-        return 'clm-badge-approved';
+        return 'approved';
       case ContractStatus.Signed:
-        return 'clm-badge-signed';
+        return 'signed';
       case ContractStatus.Active:
-        return 'clm-badge-active';
+        return 'active';
       case ContractStatus.Expiring:
-        return 'clm-badge-expiring';
+        return 'expiring';
       case ContractStatus.Renewed:
-        return 'clm-badge-renewed';
+        return 'active';
       case ContractStatus.Terminated:
-        return 'clm-badge-terminated';
+        return 'terminated';
       default:
-        return 'clm-badge-draft';
+        return 'draft';
     }
   };
 
   return (
-    <span className={`clm-badge ${getStatusClass(status)}`}>
-      <span className="clm-badge-dot" />
+    <span className={`status-badge ${getStatusClass(status)}`}>
+      <span className="status-dot" />
       {config.label}
     </span>
   );
