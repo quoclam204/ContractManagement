@@ -19,3 +19,6 @@ dist/
 # Environment files
 .env
 .env.*
+
+# Local development plans (Private - not pushed to Git)
+local-plans/
