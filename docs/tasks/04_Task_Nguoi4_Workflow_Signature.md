@@ -1,8 +1,8 @@
 # Nhiệm Vụ - Người 4 (Workflow, Approval Step, E-Signature)
 
 ## Workflow & Approval Module (Giao tiếp qua Event để tránh conflict)
-- [ ] Thiết kế entity: `WORKFLOW_DEFINITIONS`, `WORKFLOW_STEPS`, `APPROVAL_STEPS` (Schema `Workflow`).
-- [ ] Viết Use Cases cấu hình Workflow (định nghĩa các bước duyệt, điều kiện duyệt theo giá trị hợp đồng).
+- [x] Thiết kế entity: `WORKFLOW_DEFINITIONS`, `WORKFLOW_STEPS`, `APPROVAL_STEPS` (Schema `Workflow`).
+- [x] Viết Use Cases cấu hình Workflow (định nghĩa các bước duyệt, điều kiện duyệt theo giá trị hợp đồng).
 - [ ] Xử lý logic đệ trình duyệt hợp đồng (Submit) và ra quyết định duyệt (Approve/Reject).
 - [ ] **Tránh conflict logic:** Không được inject hay gọi trực tiếp vào Service của Contract. Khi tiến trình duyệt hoàn tất (Pass) hoặc bị Từ chối (Reject), hãy dùng MediatR **publish ra sự kiện**: 
   - `WorkflowApprovedEvent(ContractId)` 

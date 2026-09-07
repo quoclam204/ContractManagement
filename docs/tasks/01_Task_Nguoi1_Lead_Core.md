@@ -1,7 +1,7 @@
 # Nhiệm Vụ - Người 1 (Lead, Core, Auth)
 
 ## Thiết lập & Kiến trúc (Constitution)
-- [ ] Chốt và setup cấu trúc thư mục Clean Architecture theo chuẩn Bounded Context (Modular Monolith) để cô lập code, tránh conflict giữa các thành viên.
+- [ ] Chốt và setup cấu trúc thư mục Clean Architecture theo chuẩn Bounded Context (Modular Monolith) để cô lập code, tránh conflict ~giữa các thành viên.
 - [ ] Khởi tạo solution .NET 9. Thiết lập EF Core: Tạo `AppDbContext` phân mảnh (hoặc các DbContext riêng biệt cho từng Schema). **Quy định DB: Chỉ Lead (Người 1) được quyền gom code Entity và chạy `Add-Migration` định kỳ. Các thành viên khác chỉ tạo Entity class, tuyệt đối không tự chạy migration để tránh hỏng lịch sử DB.**
 - [ ] Setup **MediatR** làm nền tảng cho Event-Driven (Pub/Sub) giữa các module để giảm kết dính logic. Định nghĩa các base interface `IDomainEvent`.
 - [ ] Cấu hình CI/CD cơ bản, cấu hình Docker Compose (SQL Server, RabbitMQ, Seq, MinIO).

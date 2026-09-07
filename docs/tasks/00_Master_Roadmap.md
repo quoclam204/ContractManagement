@@ -3,7 +3,7 @@
 Tiến độ tổng quan của dự án theo 4 Phase và mức độ ưu tiên.
 
 ## Các giai đoạn (Phases)
-- [ ] **Phase 1 (Tuần 1-2): Nền tảng & CRUD cơ bản**
+- [] **Phase 1 (Tuần 1-2): Nền tảng & CRUD cơ bản**
   - [ ] Thiết lập Modular Monolith skeleton, DB Migration.
   - [ ] Hoàn thiện User/Auth/RBAC.
   - [ ] Hoàn thiện CRUD Partner, Contract Type & Template.

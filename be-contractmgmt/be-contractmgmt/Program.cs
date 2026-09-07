@@ -15,7 +15,20 @@ namespace be_contractmgmt
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                });
+
+            // Đăng ký dịch vụ Workflow & Approval (Người 4)
+            builder.Services.AddScoped<be_contractmgmt.Services.Workflow.Evaluator.IWorkflowConditionEvaluator, be_contractmgmt.Services.Workflow.Evaluator.WorkflowConditionEvaluator>();
+            builder.Services.AddScoped<be_contractmgmt.Services.Workflow.IWorkflowService, be_contractmgmt.Services.Workflow.WorkflowService>();
+            builder.Services.AddScoped<be_contractmgmt.Services.Workflow.IApprovalService, be_contractmgmt.Services.Workflow.ApprovalService>();
+
+            // Đăng ký MediatR cho kiến trúc Event-Driven giữa các module
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
