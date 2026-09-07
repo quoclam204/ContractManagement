@@ -18,10 +18,11 @@ export const ContractBadge: React.FC<Props> = ({ status }) => {
       style={{
         color: config.color,
         backgroundColor: config.bg,
-        border: `1px solid ${config.color}33`
+        border: `1px solid ${config.color}30`
       }}
     >
-      ● {config.label}
+      <span className="clm-badge-dot" style={{ backgroundColor: config.color }} />
+      {config.label}
     </span>
   );
 };
