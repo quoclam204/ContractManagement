@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { RefreshCw, Plus } from 'lucide-react';
 import { contractApi } from '../services/contractApi';
 import type { TemplateVersion } from '../types';
-import { IconRefresh, IconPlus } from './Icons';
 
 interface Props {
   onSelectTemplate: (template: TemplateVersion) => void;
@@ -59,7 +59,7 @@ export const TemplateList: React.FC<Props> = ({ onSelectTemplate }) => {
           className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3.5 py-2 rounded-lg font-medium shadow-xs transition-colors flex items-center gap-1.5 bg-white cursor-pointer"
           onClick={fetchTemplates}
         >
-          <IconRefresh size={14} />
+          <RefreshCw className="w-4 h-4" />
           <span>Làm mới</span>
         </button>
       </div>
@@ -69,7 +69,7 @@ export const TemplateList: React.FC<Props> = ({ onSelectTemplate }) => {
           Chưa có mẫu hợp đồng nào trong kho lưu trữ.
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="border border-slate-200 bg-white rounded-xl shadow-xs overflow-hidden">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50/75 border-b border-slate-200">
@@ -113,7 +113,7 @@ export const TemplateList: React.FC<Props> = ({ onSelectTemplate }) => {
                       className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer"
                       onClick={() => onSelectTemplate(tpl)}
                     >
-                      <IconPlus size={13} />
+                      <Plus className="w-3.5 h-3.5" />
                       <span>Dùng mẫu</span>
                     </button>
                   </td>

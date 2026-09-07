@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
+import { ArrowLeft, Send, Copy, Check, Printer } from 'lucide-react';
 import { contractApi } from '../services/contractApi';
 import { ContractStatus } from '../types';
 import type { ContractDetail } from '../types';
 import { ContractBadge } from './ContractBadge';
-import {
-  IconArrowLeft,
-  IconSend,
-  IconCopy,
-  IconCheck,
-  IconPrinter
-} from './Icons';
 
 interface Props {
   contract: ContractDetail;
@@ -65,7 +59,7 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
           className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3.5 py-1.5 rounded-lg font-medium shadow-xs transition-colors flex items-center gap-1.5 bg-white cursor-pointer"
           onClick={onBack}
         >
-          <IconArrowLeft size={14} />
+          <ArrowLeft className="w-4 h-4" />
           <span>Quay lại</span>
         </button>
 
@@ -75,7 +69,7 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
             className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3.5 py-1.5 rounded-lg font-medium shadow-xs transition-colors flex items-center gap-1.5 bg-white cursor-pointer"
             onClick={() => window.print()}
           >
-            <IconPrinter size={14} />
+            <Printer className="w-4 h-4" />
             <span>In</span>
           </button>
 
@@ -86,7 +80,7 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
               disabled={submitting}
               onClick={handleSubmitForApproval}
             >
-              <IconSend size={14} />
+              <Send className="w-4 h-4" />
               <span>{submitting ? 'Đang gửi...' : 'Trình duyệt'}</span>
             </button>
           )}
@@ -106,7 +100,7 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
       )}
 
       {/* Header Info */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 mb-5 shadow-xs">
+      <div className="border border-slate-200 bg-white rounded-xl p-5 mb-5 shadow-xs">
         <div className="flex items-center gap-2.5 mb-2.5">
           <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200 text-slate-700 whitespace-nowrap inline-flex items-center gap-1.5">
             {contract.contractNumber}
@@ -116,7 +110,7 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
               onClick={handleCopyCode}
               title="Sao chép"
             >
-              {copied ? <IconCheck size={12} color="#10b981" /> : <IconCopy size={12} />}
+              {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
             </button>
           </span>
           <ContractBadge status={contract.status} />
@@ -131,7 +125,7 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
       </div>
 
       {/* State Machine Stepper */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 mb-5 shadow-xs flex items-center justify-between text-xs font-medium">
+      <div className="border border-slate-200 bg-white rounded-xl p-4 sm:p-5 mb-5 shadow-xs flex items-center justify-between text-xs font-medium">
         <div className={`flex items-center gap-2 ${isPassed(0) ? 'text-emerald-600' : isActive(0) ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>
           <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isPassed(0) ? 'bg-emerald-600 text-white' : isActive(0) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
             {isPassed(0) ? '✓' : '1'}
@@ -181,7 +175,7 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
       </div>
 
       {/* Specifications Grid */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+      <div className="border border-slate-200 bg-white rounded-xl p-5 shadow-xs">
         <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">
           Thông tin chi tiết hợp đồng
         </h3>

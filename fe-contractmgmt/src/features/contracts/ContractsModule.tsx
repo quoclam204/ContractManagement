@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Plus, FileText, Clock3, CheckCircle2, WalletCards } from 'lucide-react';
 import { TemplateList } from './components/TemplateList';
 import { ContractDraftForm } from './components/ContractDraftForm';
 import { ContractList } from './components/ContractList';
@@ -6,7 +7,6 @@ import { ContractDetailView } from './components/ContractDetailView';
 import type { TemplateVersion, ContractDetail, ContractListItem } from './types';
 import { ContractStatus } from './types';
 import { contractApi } from './services/contractApi';
-import { IconPlus } from './components/Icons';
 
 type ViewMode = 'list' | 'create' | 'templates' | 'detail';
 
@@ -70,8 +70,8 @@ export const ContractsModule: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-slate-50/60 min-h-screen text-slate-800 p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header: H1 & Subtitle + Action Button */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
@@ -91,7 +91,7 @@ export const ContractsModule: React.FC = () => {
                   setViewMode('create');
                 }}
               >
-                <IconPlus size={15} />
+                <Plus className="w-4 h-4" />
                 <span>Tạo hợp đồng</span>
               </button>
             </div>
@@ -100,33 +100,53 @@ export const ContractsModule: React.FC = () => {
 
         {/* 4 KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              Tổng số hợp đồng
+          <div className="border border-slate-200/80 bg-white p-5 rounded-xl shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                Tổng số hợp đồng
+              </div>
+              <div className="text-2xl font-bold text-slate-900">{totalContracts}</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{totalContracts}</div>
+            <div className="p-2.5 bg-blue-50/80 rounded-lg">
+              <FileText className="w-5 h-5 text-blue-600" />
+            </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              Chờ phê duyệt
+          <div className="border border-slate-200/80 bg-white p-5 rounded-xl shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                Chờ phê duyệt
+              </div>
+              <div className="text-2xl font-bold text-amber-600">{pendingCount}</div>
             </div>
-            <div className="text-2xl font-bold text-amber-600">{pendingCount}</div>
+            <div className="p-2.5 bg-amber-50/80 rounded-lg">
+              <Clock3 className="w-5 h-5 text-amber-600" />
+            </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              Đang có hiệu lực
+          <div className="border border-slate-200/80 bg-white p-5 rounded-xl shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                Đang có hiệu lực
+              </div>
+              <div className="text-2xl font-bold text-emerald-600">{activeCount}</div>
             </div>
-            <div className="text-2xl font-bold text-emerald-600">{activeCount}</div>
+            <div className="p-2.5 bg-emerald-50/80 rounded-lg">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              Tổng giá trị cam kết
+          <div className="border border-slate-200/80 bg-white p-5 rounded-xl shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                Tổng giá trị cam kết
+              </div>
+              <div className="text-2xl font-bold text-slate-900">
+                {formatCurrencyCompact(totalValue)}
+              </div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">
-              {formatCurrencyCompact(totalValue)}
+            <div className="p-2.5 bg-indigo-50/80 rounded-lg">
+              <WalletCards className="w-5 h-5 text-indigo-600" />
             </div>
           </div>
         </div>
@@ -212,7 +232,7 @@ export const ContractsModule: React.FC = () => {
         {viewMode === 'detail' && (
           <>
             {loadingDetail ? (
-              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-500 text-sm">
+              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-500 text-sm shadow-xs">
                 Đang truy xuất thông tin chi tiết hợp đồng...
               </div>
             ) : currentContract ? (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Send } from 'lucide-react';
 import { contractApi } from '../services/contractApi';
 import type { ContractType, TemplateVersion, ContractDetail } from '../types';
-import { IconSend } from './Icons';
 
 interface Props {
   selectedTemplate?: TemplateVersion | null;
@@ -225,7 +225,7 @@ export const ContractDraftForm: React.FC<Props> = ({ selectedTemplate, onSuccess
           disabled={loading}
           onClick={() => handleSave(true)}
         >
-          <IconSend size={14} />
+          <Send className="w-4 h-4" />
           <span>{loading ? 'Đang lưu...' : 'Lưu & Trình duyệt'}</span>
         </button>
       </div>

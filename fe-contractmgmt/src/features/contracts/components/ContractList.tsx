@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { Search, RefreshCw, Plus, Copy, Check, Download } from 'lucide-react';
 import { contractApi } from '../services/contractApi';
 import { ContractStatus } from '../types';
 import type { ContractListItem } from '../types';
 import { ContractBadge } from './ContractBadge';
-import {
-  IconSearch,
-  IconRefresh,
-  IconPlus,
-  IconCopy,
-  IconCheck,
-  IconDownload
-} from './Icons';
 
 interface Props {
   onSelectContract: (id: string) => void;
@@ -97,7 +90,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
         <div className="flex flex-1 items-center gap-3">
           <form onSubmit={handleSearchSubmit} className="relative w-72 sm:w-80">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <IconSearch size={15} />
+              <Search className="w-4 h-4" />
             </span>
             <input
               type="text"
@@ -131,7 +124,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
             onClick={handleExportCSV}
             title="Xuất file CSV"
           >
-            <IconDownload size={14} />
+            <Download className="w-4 h-4" />
             <span>Xuất CSV</span>
           </button>
 
@@ -141,7 +134,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
             onClick={fetchContracts}
             title="Làm mới"
           >
-            <IconRefresh size={14} />
+            <RefreshCw className="w-4 h-4" />
             <span>Làm mới</span>
           </button>
         </div>
@@ -154,7 +147,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
       )}
 
       {/* Data Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+      <div className="border border-slate-200 bg-white rounded-xl shadow-xs overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-sm text-slate-500">
             Đang tải dữ liệu hợp đồng...
@@ -169,7 +162,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
               className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer"
               onClick={onCreateNew}
             >
-              <IconPlus size={13} />
+              <Plus className="w-3.5 h-3.5" />
               <span>Tạo hợp đồng mới</span>
             </button>
           </div>
@@ -181,7 +174,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
                   <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                     Số Hợp Đồng
                   </th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider min-w-[260px]">
                     Tiêu Đề Hợp Đồng
                   </th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
@@ -193,13 +186,13 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
                   <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider text-right">
                     Giá Trị
                   </th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider text-center">
                     Thời Hạn
                   </th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Trạng Thái
                   </th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider text-right">
+                  <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider text-center">
                     Thao Tác
                   </th>
                 </tr>
@@ -223,12 +216,12 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
                             onClick={(e) => handleCopy(e, c.contractNumber, c.id)}
                             title="Sao chép số hợp đồng"
                           >
-                            {isCopied ? <IconCheck size={13} color="#10b981" /> : <IconCopy size={13} />}
+                            {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                           </button>
                         </span>
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 min-w-[260px]">
                         <div className="font-semibold text-slate-900 line-clamp-1">
                           {c.title}
                         </div>
@@ -246,7 +239,7 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
                         {formatCurrency(c.value)}
                       </td>
 
-                      <td className="py-3 px-4 text-slate-500 text-xs whitespace-nowrap">
+                      <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
                         {new Date(c.effectiveDate).toLocaleDateString('vi-VN')} – {new Date(c.expiryDate).toLocaleDateString('vi-VN')}
                       </td>
 
@@ -254,10 +247,10 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
                         <ContractBadge status={c.status} />
                       </td>
 
-                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <button
                           type="button"
-                          className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors cursor-pointer"
+                          className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             onSelectContract(c.id);
