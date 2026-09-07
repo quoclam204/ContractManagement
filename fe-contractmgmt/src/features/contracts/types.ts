@@ -77,6 +77,7 @@ export interface ContractDetail {
   status: ContractStatus;
   fileUrl?: string;
   parentContractId?: string;
+  rowVersion?: string;
   createdAt: string;
   updatedAt?: string;
 }
