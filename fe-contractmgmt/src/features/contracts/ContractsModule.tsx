@@ -7,6 +7,14 @@ import { ContractDetailView } from './components/ContractDetailView';
 import type { TemplateVersion, ContractDetail, ContractListItem } from './types';
 import { ContractStatus } from './types';
 import { contractApi } from './services/contractApi';
+import {
+  IconFileText,
+  IconPlus,
+  IconClock,
+  IconCheckCircle,
+  IconTrendingUp,
+  IconTemplate
+} from './components/Icons';
 
 type ViewMode = 'list' | 'create' | 'templates' | 'detail';
 
@@ -17,7 +25,6 @@ export const ContractsModule: React.FC = () => {
   const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
   const [contractsSummary, setContractsSummary] = useState<ContractListItem[]>([]);
 
-  // Tải thống kê nhanh cho KPI cards
   const loadStats = async () => {
     try {
       const res = await contractApi.getContracts({ pageSize: 100 });
@@ -36,14 +43,14 @@ export const ContractsModule: React.FC = () => {
   const activeCount = contractsSummary.filter((c) => c.status === ContractStatus.Active).length;
   const totalValue = contractsSummary.reduce((sum, c) => sum + (c.value || 0), 0);
 
-  const formatBillion = (val: number) => {
+  const formatCurrencyCompact = (val: number) => {
     if (val >= 1_000_000_000) {
-      return (val / 1_000_000_000).toFixed(2) + ' Tỷ đ';
+      return (val / 1_000_000_000).toFixed(2) + ' tỷ VNĐ';
     }
     if (val >= 1_000_000) {
-      return (val / 1_000_000).toFixed(1) + ' Tr đ';
+      return (val / 1_000_000).toFixed(1) + ' triệu VNĐ';
     }
-    return new Intl.NumberFormat('vi-VN').format(val) + ' đ';
+    return new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ';
   };
 
   const handleSelectTemplate = (template: TemplateVersion) => {
@@ -71,17 +78,16 @@ export const ContractsModule: React.FC = () => {
   };
 
   return (
-    <div className="clm-container">
-      {/* Top Header */}
-      <div className="clm-header">
-        <div className="clm-title-area">
-          <div className="clm-title-icon">📜</div>
-          <div>
-            <h1 className="clm-title">Quản Lý Vòng Đời Hợp Đồng</h1>
-            <p className="clm-subtitle">
-              Module Người 2 • Soạn thảo, quản trị mẫu văn bản, theo dõi tiến trình và trạng thái
-            </p>
+    <div className="clm-wrapper">
+      {/* Topbar & Breadcrumb */}
+      <div className="clm-topbar">
+        <div>
+          <div className="clm-breadcrumb">
+            <span>Quản trị doanh nghiệp</span>
+            <span>/</span>
+            <span className="clm-breadcrumb-active">Hợp đồng & Văn bản</span>
           </div>
+          <h1 className="clm-main-title">Quản Lý Vòng Đời Hợp Đồng</h1>
         </div>
 
         <button
@@ -91,88 +97,95 @@ export const ContractsModule: React.FC = () => {
             setViewMode('create');
           }}
         >
-          <span>➕</span> Soạn Hợp Đồng Mới
+          <IconPlus size={15} />
+          <span>Tạo Hợp Đồng Mới</span>
         </button>
       </div>
 
-      {/* KPI Stats Grid */}
-      <div className="clm-stats-grid">
-        <div className="clm-stat-card">
-          <div className="clm-stat-info">
-            <span className="clm-stat-label">Tổng Hợp Đồng</span>
-            <span className="clm-stat-val">{totalContracts}</span>
+      {/* KPI Stats Row (Clean & Compact) */}
+      <div className="clm-stats-row">
+        <div className="clm-metric-card">
+          <div>
+            <div className="clm-metric-title">Tổng số hợp đồng</div>
+            <div className="clm-metric-value">{totalContracts}</div>
           </div>
-          <div className="clm-stat-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}>
-            📁
+          <div className="clm-metric-icon-wrap" style={{ background: '#f0f9ff', color: '#0284c7' }}>
+            <IconFileText size={20} />
           </div>
         </div>
 
-        <div className="clm-stat-card">
-          <div className="clm-stat-info">
-            <span className="clm-stat-label">Chờ Phê Duyệt</span>
-            <span className="clm-stat-val" style={{ color: '#d97706' }}>
+        <div className="clm-metric-card">
+          <div>
+            <div className="clm-metric-title">Chờ phê duyệt</div>
+            <div className="clm-metric-value" style={{ color: '#d97706' }}>
               {pendingCount}
-            </span>
+            </div>
           </div>
-          <div className="clm-stat-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
-            ⏳
+          <div className="clm-metric-icon-wrap" style={{ background: '#fffbeb', color: '#d97706' }}>
+            <IconClock size={20} />
           </div>
         </div>
 
-        <div className="clm-stat-card">
-          <div className="clm-stat-info">
-            <span className="clm-stat-label">Đang Có Hiệu Lực</span>
-            <span className="clm-stat-val" style={{ color: '#059669' }}>
+        <div className="clm-metric-card">
+          <div>
+            <div className="clm-metric-title">Đang có hiệu lực</div>
+            <div className="clm-metric-value" style={{ color: '#059669' }}>
               {activeCount}
-            </span>
+            </div>
           </div>
-          <div className="clm-stat-icon" style={{ background: '#ecfdf5', color: '#059669' }}>
-            🟢
+          <div className="clm-metric-icon-wrap" style={{ background: '#ecfdf5', color: '#059669' }}>
+            <IconCheckCircle size={20} />
           </div>
         </div>
 
-        <div className="clm-stat-card">
-          <div className="clm-stat-info">
-            <span className="clm-stat-label">Tổng Giá Trị</span>
-            <span className="clm-stat-val" style={{ color: '#4f46e5' }}>
-              {formatBillion(totalValue)}
-            </span>
+        <div className="clm-metric-card">
+          <div>
+            <div className="clm-metric-title">Tổng giá trị cam kết</div>
+            <div className="clm-metric-value" style={{ color: '#111827', fontSize: 18 }}>
+              {formatCurrencyCompact(totalValue)}
+            </div>
           </div>
-          <div className="clm-stat-icon" style={{ background: '#eef2ff', color: '#4f46e5' }}>
-            💎
+          <div className="clm-metric-icon-wrap" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+            <IconTrendingUp size={20} />
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="clm-tabs">
+      {/* Navigation Tabs (Underline Flat) */}
+      <div className="clm-nav-tabs">
         <button
-          className={`clm-tab-btn ${viewMode === 'list' ? 'active' : ''}`}
+          className={`clm-nav-tab ${viewMode === 'list' ? 'active' : ''}`}
           onClick={() => setViewMode('list')}
         >
-          <span>📋</span> Danh Sách Hợp Đồng
+          <IconFileText size={16} />
+          <span>Danh sách hợp đồng</span>
+          <span className="clm-nav-tab-badge">{totalContracts}</span>
         </button>
+
         <button
-          className={`clm-tab-btn ${viewMode === 'templates' ? 'active' : ''}`}
+          className={`clm-nav-tab ${viewMode === 'templates' ? 'active' : ''}`}
           onClick={() => {
             setSelectedTemplate(null);
             setViewMode('templates');
           }}
         >
-          <span>📑</span> Kho Mẫu Hợp Đồng (Templates)
+          <IconTemplate size={16} />
+          <span>Mẫu văn bản (Templates)</span>
         </button>
+
         <button
-          className={`clm-tab-btn ${viewMode === 'create' ? 'active' : ''}`}
+          className={`clm-nav-tab ${viewMode === 'create' ? 'active' : ''}`}
           onClick={() => {
             setSelectedTemplate(null);
             setViewMode('create');
           }}
         >
-          <span>✍️</span> Soạn Thảo Mới
+          <IconPlus size={15} />
+          <span>Soạn thảo nháp</span>
         </button>
       </div>
 
-      {/* Main Content Views */}
+      {/* Main Views */}
       {viewMode === 'list' && (
         <ContractList
           onSelectContract={handleSelectContract}
@@ -198,7 +211,7 @@ export const ContractsModule: React.FC = () => {
       {viewMode === 'detail' && (
         <>
           {loadingDetail ? (
-            <div style={{ padding: 60, textAlign: 'center', color: 'var(--color-slate-500)' }}>
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--clm-text-muted)' }}>
               Đang tải chi tiết hợp đồng...
             </div>
           ) : currentContract ? (
@@ -211,7 +224,7 @@ export const ContractsModule: React.FC = () => {
               }}
             />
           ) : (
-            <div className="clm-alert-error">Không tìm thấy hợp đồng.</div>
+            <div className="clm-alert clm-alert-error">Không tìm thấy thông tin hợp đồng.</div>
           )}
         </>
       )}

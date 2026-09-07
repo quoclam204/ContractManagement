@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { contractApi } from '../services/contractApi';
 import type { TemplateVersion } from '../types';
+import { IconFileText, IconRefresh, IconTemplate } from './Icons';
 
 interface Props {
   onSelectTemplate: (template: TemplateVersion) => void;
@@ -30,87 +31,89 @@ export const TemplateList: React.FC<Props> = ({ onSelectTemplate }) => {
 
   if (loading) {
     return (
-      <div style={{ padding: 60, textAlign: 'center', color: 'var(--color-slate-500)' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--clm-text-muted)', fontSize: 13 }}>
         Đang tải danh sách mẫu hợp đồng chuẩn...
       </div>
     );
   }
 
-  if (error) return <div className="clm-alert-error">{error}</div>;
+  if (error) return <div className="clm-alert clm-alert-error">{error}</div>;
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, color: 'var(--color-slate-900)' }}>
-            Kho Mẫu Hợp Đồng Chuẩn Doanh Nghiệp
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--clm-text-title)' }}>
+            Kho Mẫu Hợp Đồng Doanh Nghiệp
           </h3>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-slate-500)' }}>
-            Các mẫu văn bản hợp đồng chính thức đang có hiệu lực (Active) hỗ trợ tạo lập nhanh chóng.
+          <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--clm-text-muted)' }}>
+            Danh mục các bản mẫu chính thức đang có hiệu lực (Active) phục vụ khởi tạo hợp đồng nhanh.
           </p>
         </div>
-        <button className="clm-btn clm-btn-secondary clm-btn-sm" onClick={fetchTemplates}>
-          <span>🔄</span> Làm mới danh sách
+        <button className="clm-btn clm-btn-outline clm-btn-sm" onClick={fetchTemplates}>
+          <IconRefresh size={14} />
+          <span>Làm mới</span>
         </button>
       </div>
 
       {templates.length === 0 ? (
-        <div className="clm-table-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📑</div>
-          <h4 style={{ margin: '0 0 8px', fontSize: 16 }}>Chưa có mẫu hợp đồng nào</h4>
-          <p style={{ color: 'var(--color-slate-500)', fontSize: 13 }}>
-            Các mẫu hợp đồng sẽ xuất hiện khi quản trị viên tạo mới.
+        <div className="clm-card-panel" style={{ textAlign: 'center', padding: '48px 20px' }}>
+          <div style={{ color: 'var(--clm-text-light)', marginBottom: 12 }}>
+            <IconTemplate size={36} />
+          </div>
+          <h4 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 600 }}>Chưa có mẫu hợp đồng nào</h4>
+          <p style={{ color: 'var(--clm-text-muted)', fontSize: 13, margin: 0 }}>
+            Quản trị viên có thể cấu hình và cập nhật phiên bản mẫu hợp đồng qua API.
           </p>
         </div>
       ) : (
-        <div className="clm-templates-grid">
+        <div className="clm-template-grid">
           {templates.map((tpl) => (
-            <div key={tpl.id} className="clm-template-card">
+            <div key={tpl.id} className="clm-template-item">
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                <div className="clm-template-header">
                   <span
                     style={{
                       fontSize: 11,
-                      fontWeight: 700,
-                      color: 'var(--color-primary)',
-                      background: 'var(--color-primary-bg)',
-                      padding: '3px 8px',
-                      borderRadius: 'var(--radius-sm)'
+                      fontWeight: 600,
+                      color: 'var(--clm-primary)',
+                      background: 'var(--clm-primary-light)',
+                      padding: '2px 7px',
+                      borderRadius: 4
                     }}
                   >
                     Phiên bản v{tpl.version}
                   </span>
-                  <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>● Đang sử dụng</span>
+                  <span style={{ fontSize: 12, color: '#059669', fontWeight: 500 }}>● Đang sử dụng</span>
                 </div>
 
-                <h4 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: 'var(--color-slate-900)' }}>
-                  {tpl.contractTypeName}
-                </h4>
+                <h4 className="clm-template-title">{tpl.contractTypeName}</h4>
 
-                <p style={{ fontSize: 13, color: 'var(--color-slate-500)', margin: '0 0 16px', lineHeight: 1.5 }}>
+                <div className="clm-template-meta">
                   {tpl.contentJson
-                    ? 'Mẫu chuẩn hóa đã cấu hình các trường động và điều khoản tự động điền.'
-                    : 'Mẫu hợp đồng văn bản cơ bản được doanh nghiệp quy chuẩn.'}
-                </p>
+                    ? 'Mẫu chuẩn hóa đã tích hợp cấu trúc trường động JSON.'
+                    : 'Mẫu văn bản tiêu chuẩn do phòng pháp chế ban hành.'}
+                </div>
               </div>
 
               <div
                 style={{
-                  borderTop: '1px solid var(--color-slate-100)',
-                  paddingTop: 16,
+                  borderTop: '1px solid var(--clm-border-light)',
+                  paddingTop: 14,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center'
                 }}
               >
-                <span style={{ fontSize: 12, color: 'var(--color-slate-400)' }}>
-                  {new Date(tpl.createdAt).toLocaleDateString('vi-VN')}
+                <span style={{ fontSize: 12, color: 'var(--clm-text-light)' }}>
+                  Ngày tạo: {new Date(tpl.createdAt).toLocaleDateString('vi-VN')}
                 </span>
                 <button
                   className="clm-btn clm-btn-primary clm-btn-sm"
                   onClick={() => onSelectTemplate(tpl)}
                 >
-                  ✍️ Dùng Mẫu Này
+                  <IconFileText size={14} />
+                  <span>Áp dụng mẫu</span>
                 </button>
               </div>
             </div>

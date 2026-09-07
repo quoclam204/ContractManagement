@@ -3,6 +3,7 @@ import { contractApi } from '../services/contractApi';
 import { ContractStatus } from '../types';
 import type { ContractListItem } from '../types';
 import { ContractBadge } from './ContractBadge';
+import { IconSearch, IconRefresh, IconPlus, IconFileText } from './Icons';
 
 interface Props {
   onSelectContract: (id: string) => void;
@@ -47,102 +48,106 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
 
   return (
     <div>
-      {/* Toolbar: Search + Filter + Actions */}
-      <div className="clm-toolbar">
-        <form onSubmit={handleSearchSubmit} className="clm-search-wrap">
-          <span className="clm-search-icon">🔍</span>
+      {/* Search & Filter Action Bar */}
+      <div className="clm-action-bar">
+        <form onSubmit={handleSearchSubmit} className="clm-search-box">
+          <IconSearch size={15} color="#9ca3af" />
           <input
             type="text"
             className="clm-search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo mã số HĐ hoặc tiêu đề..."
+            placeholder="Tìm theo số HĐ hoặc tiêu đề..."
           />
         </form>
 
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
           <select
-            className="clm-field-select"
-            style={{ width: 220, padding: '10px 14px' }}
+            className="clm-select-compact"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="">🔘 Tất cả trạng thái</option>
-            <option value={ContractStatus.Draft}>Draft (Bản nháp)</option>
-            <option value={ContractStatus.PendingApproval}>Pending (Chờ duyệt)</option>
-            <option value={ContractStatus.Approved}>Approved (Đã duyệt)</option>
-            <option value={ContractStatus.Signed}>Signed (Đã ký)</option>
-            <option value={ContractStatus.Active}>Active (Đang hiệu lực)</option>
-            <option value={ContractStatus.Expiring}>Expiring (Sắp hết hạn)</option>
-            <option value={ContractStatus.Renewed}>Renewed (Đã gia hạn)</option>
-            <option value={ContractStatus.Terminated}>Terminated (Đã thanh lý)</option>
+            <option value="">Tất cả trạng thái</option>
+            <option value={ContractStatus.Draft}>Bản nháp (Draft)</option>
+            <option value={ContractStatus.PendingApproval}>Chờ duyệt (Pending)</option>
+            <option value={ContractStatus.Approved}>Đã duyệt (Approved)</option>
+            <option value={ContractStatus.Signed}>Đã ký (Signed)</option>
+            <option value={ContractStatus.Active}>Hiệu lực (Active)</option>
+            <option value={ContractStatus.Expiring}>Sắp hết hạn (Expiring)</option>
+            <option value={ContractStatus.Renewed}>Đã gia hạn (Renewed)</option>
+            <option value={ContractStatus.Terminated}>Đã thanh lý (Terminated)</option>
           </select>
 
-          <button className="clm-btn clm-btn-secondary" onClick={fetchContracts}>
-            <span>🔄</span> Làm mới
+          <button className="clm-btn clm-btn-outline" onClick={fetchContracts}>
+            <IconRefresh size={14} />
+            <span>Làm mới</span>
           </button>
         </div>
       </div>
 
-      {error && <div className="clm-alert-error">{error}</div>}
+      {error && <div className="clm-alert clm-alert-error">{error}</div>}
 
       {loading ? (
-        <div style={{ padding: 50, textAlign: 'center', color: 'var(--color-slate-500)' }}>
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--clm-text-muted)', fontSize: 13 }}>
           Đang tải danh sách hợp đồng...
         </div>
       ) : contracts.length === 0 ? (
-        <div className="clm-table-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
-          <h4 style={{ margin: '0 0 8px', fontSize: 16, color: 'var(--color-slate-800)' }}>
-            Chưa có hợp đồng nào trong danh mục
+        <div className="clm-card-panel" style={{ textAlign: 'center', padding: '48px 20px' }}>
+          <div style={{ color: 'var(--clm-text-light)', marginBottom: 12 }}>
+            <IconFileText size={36} />
+          </div>
+          <h4 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: 'var(--clm-text-title)' }}>
+            Không tìm thấy hợp đồng nào
           </h4>
-          <p style={{ color: 'var(--color-slate-500)', margin: '0 0 20px', fontSize: 14 }}>
-            Bắt đầu tạo hợp đồng nháp đầu tiên từ mẫu hoặc tạo mới hoàn toàn.
+          <p style={{ color: 'var(--clm-text-muted)', margin: '0 0 16px', fontSize: 13 }}>
+            Chưa có hợp đồng nào phù hợp với bộ lọc tìm kiếm hiện tại.
           </p>
           <button className="clm-btn clm-btn-primary" onClick={onCreateNew}>
-            ✍️ Soạn Hợp Đồng Ngay
+            <IconPlus size={14} />
+            <span>Soạn hợp đồng mới</span>
           </button>
         </div>
       ) : (
-        <div className="clm-table-card">
-          <table className="clm-table">
+        <div className="clm-card-panel">
+          <table className="clm-data-table">
             <thead>
               <tr>
-                <th>Mã Số HĐ</th>
-                <th>Tiêu Đề & Đối Tác</th>
-                <th>Loại Hợp Đồng</th>
-                <th>Giá Trị</th>
-                <th>Thời Hạn Hiệu Lực</th>
-                <th>Trạng Thái</th>
-                <th style={{ textAlign: 'right' }}>Hành Động</th>
+                <th style={{ width: 140 }}>Số Hợp Đồng</th>
+                <th>Tiêu Đề Hợp Đồng</th>
+                <th>Phân Loại</th>
+                <th style={{ width: 150 }}>Giá Trị</th>
+                <th style={{ width: 180 }}>Thời Hạn</th>
+                <th style={{ width: 140 }}>Trạng Thái</th>
+                <th style={{ width: 90, textAlign: 'right' }}>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
               {contracts.map((c) => (
                 <tr key={c.id}>
                   <td>
-                    <span className="clm-contract-code">{c.contractNumber}</span>
+                    <span className="clm-code-tag">{c.contractNumber}</span>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 700, color: 'var(--color-slate-900)' }}>{c.title}</div>
-                    <div style={{ fontSize: 12, color: 'var(--color-slate-500)', marginTop: 2 }}>
-                      🏢 {c.partnerName}
+                    <div style={{ fontWeight: 600, color: 'var(--clm-text-title)', fontSize: 13 }}>
+                      {c.title}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--clm-text-muted)', marginTop: 2 }}>
+                      {c.partnerName}
                     </div>
                   </td>
                   <td>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-slate-700)' }}>
+                    <span style={{ fontSize: 13, color: 'var(--clm-text-body)' }}>
                       {c.contractTypeName}
                     </span>
                   </td>
                   <td>
-                    <span className="clm-amount">{formatCurrency(c.value)}</span>
+                    <span style={{ fontWeight: 600, color: '#059669', fontSize: 13 }}>
+                      {formatCurrency(c.value)}
+                    </span>
                   </td>
                   <td>
-                    <div style={{ fontSize: 13, color: 'var(--color-slate-700)' }}>
-                      {new Date(c.effectiveDate).toLocaleDateString('vi-VN')}
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--color-slate-400)' }}>
-                      đến {new Date(c.expiryDate).toLocaleDateString('vi-VN')}
+                    <div style={{ fontSize: 12, color: 'var(--clm-text-body)' }}>
+                      {new Date(c.effectiveDate).toLocaleDateString('vi-VN')} → {new Date(c.expiryDate).toLocaleDateString('vi-VN')}
                     </div>
                   </td>
                   <td>
@@ -150,10 +155,10 @@ export const ContractList: React.FC<Props> = ({ onSelectContract, onCreateNew })
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <button
-                      className="clm-btn clm-btn-secondary clm-btn-sm"
+                      className="clm-btn clm-btn-outline clm-btn-sm"
                       onClick={() => onSelectContract(c.id)}
                     >
-                      Chi tiết →
+                      Chi tiết
                     </button>
                   </td>
                 </tr>
