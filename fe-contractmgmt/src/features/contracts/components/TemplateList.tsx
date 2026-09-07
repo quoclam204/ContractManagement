@@ -31,69 +31,89 @@ export const TemplateList: React.FC<Props> = ({ onSelectTemplate }) => {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13 }}>
-        Đang tải danh sách mẫu...
+      <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-sm text-slate-500 shadow-xs">
+        Đang tải danh sách mẫu hợp đồng...
       </div>
     );
   }
 
-  if (error) return <div className="alert alert-error">{error}</div>;
+  if (error) {
+    return (
+      <div className="p-3.5 mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-            Kho Mẫu Hợp Đồng
-          </h2>
-          <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--color-text-muted)' }}>
-            Các biểu mẫu chính thức phục vụ khởi tạo nhanh hợp đồng.
+          <h2 className="text-base font-bold text-slate-900">Kho Mẫu Hợp Đồng</h2>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Các biểu mẫu chuẩn hóa hỗ trợ tự động điền và tạo lập hợp đồng nhanh chóng
           </p>
         </div>
-        <button type="button" className="btn btn-outline btn-sm" onClick={fetchTemplates}>
-          <IconRefresh size={13} />
+        <button
+          type="button"
+          className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3.5 py-2 rounded-lg font-medium shadow-xs transition-colors flex items-center gap-1.5 bg-white cursor-pointer"
+          onClick={fetchTemplates}
+        >
+          <IconRefresh size={14} />
           <span>Làm mới</span>
         </button>
       </div>
 
       {templates.length === 0 ? (
-        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13 }}>
-          Chưa có mẫu hợp đồng nào trong hệ thống.
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-sm text-slate-500 shadow-xs">
+          Chưa có mẫu hợp đồng nào trong kho lưu trữ.
         </div>
       ) : (
-        <div className="table-card">
-          <table className="data-table">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr>
-                <th>Tên Loại Hợp Đồng</th>
-                <th style={{ width: 100 }}>Phiên Bản</th>
-                <th>Mô Tả / Nội Dung</th>
-                <th>Ngày Tạo</th>
-                <th style={{ width: 140, textAlign: 'right' }}>Thao Tác</th>
+              <tr className="bg-slate-50/75 border-b border-slate-200">
+                <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Loại Hợp Đồng
+                </th>
+                <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Phiên Bản
+                </th>
+                <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Mô Tả Tiêu Chuẩn
+                </th>
+                <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Ngày Ban Hành
+                </th>
+                <th className="py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider text-right">
+                  Thao Tác
+                </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {templates.map((tpl) => (
-                <tr key={tpl.id}>
-                  <td>
-                    <strong>{tpl.contractTypeName}</strong>
+                <tr key={tpl.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4 font-semibold text-slate-900">
+                    {tpl.contractTypeName}
                   </td>
-                  <td>
-                    <span className="code-tag">v{tpl.version}.0</span>
+                  <td className="py-3 px-4">
+                    <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-slate-700">
+                      v{tpl.version}.0
+                    </span>
                   </td>
-                  <td style={{ color: 'var(--color-text-muted)', fontSize: 13 }}>
-                    Mẫu chuẩn do Pháp chế ban hành, hỗ trợ điền tự động.
+                  <td className="py-3 px-4 text-slate-600">
+                    Mẫu hợp đồng chuẩn hóa do Pháp chế ban hành, có hiệu lực sử dụng.
                   </td>
-                  <td style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+                  <td className="py-3 px-4 text-slate-500 text-xs whitespace-nowrap">
                     {new Date(tpl.createdAt).toLocaleDateString('vi-VN')}
                   </td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="py-3 px-4 text-right">
                     <button
                       type="button"
-                      className="btn btn-primary btn-sm"
+                      className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer"
                       onClick={() => onSelectTemplate(tpl)}
                     >
-                      <IconPlus size={12} />
+                      <IconPlus size={13} />
                       <span>Dùng mẫu</span>
                     </button>
                   </td>

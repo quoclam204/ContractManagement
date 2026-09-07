@@ -85,121 +85,147 @@ export const ContractDraftForm: React.FC<Props> = ({ selectedTemplate, onSuccess
   };
 
   return (
-    <div className="form-card">
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          {selectedTemplate ? `Tạo hợp đồng theo mẫu: ${selectedTemplate.contractTypeName}` : 'Soạn thảo hợp đồng mới'}
+    <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 max-w-3xl shadow-xs">
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-slate-900">
+          {selectedTemplate ? `Soạn hợp đồng từ mẫu: ${selectedTemplate.contractTypeName}` : 'Soạn thảo hợp đồng mới'}
         </h2>
-        <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-muted)' }}>
-          Nhập các thông số cơ bản để khởi tạo hợp đồng vào hệ thống.
+        <p className="text-sm text-slate-500 mt-0.5">
+          Nhập thông tin chi tiết để khởi tạo bản ghi hợp đồng vào hệ thống
         </p>
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
-
-      <div className="form-group">
-        <label className="form-label">Phân loại hợp đồng *</label>
-        <select
-          className="form-select"
-          value={contractTypeId}
-          onChange={(e) => setContractTypeId(e.target.value)}
-        >
-          {types.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label className="form-label">Tiêu đề hợp đồng *</label>
-        <input
-          type="text"
-          className="form-input"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Nhập tiêu đề hợp đồng..."
-        />
-      </div>
-
-      <div className="form-group">
-        <label className="form-label">Tên đối tác (Bên B)</label>
-        <input
-          type="text"
-          className="form-input"
-          value={partnerName}
-          onChange={(e) => setPartnerName(e.target.value)}
-          placeholder="Nhập tên công ty hoặc tổ chức đối tác..."
-        />
-      </div>
-
-      <div className="form-group">
-        <label className="form-label">Giá trị hợp đồng (VNĐ) *</label>
-        <input
-          type="number"
-          step="1000000"
-          className="form-input"
-          value={value}
-          onChange={(e) => setValue(Number(e.target.value))}
-        />
-        <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>
-          Tương đương: <strong>{formatCurrency(value)}</strong>
+      {error && (
+        <div className="p-3.5 mb-5 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+          {error}
         </div>
-      </div>
+      )}
 
-      <div className="form-grid-2">
-        <div className="form-group">
-          <label className="form-label">Ngày hiệu lực *</label>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Phân loại hợp đồng *
+          </label>
+          <select
+            className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 shadow-xs"
+            value={contractTypeId}
+            onChange={(e) => setContractTypeId(e.target.value)}
+          >
+            {types.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Tiêu đề hợp đồng *
+          </label>
           <input
-            type="date"
-            className="form-input"
-            value={effectiveDate}
-            onChange={(e) => setEffectiveDate(e.target.value)}
+            type="text"
+            className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 shadow-xs placeholder:text-slate-400"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="VD: Hợp đồng cung cấp dịch vụ hạ tầng mạng..."
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Ngày hết hạn *</label>
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Tên đối tác (Bên B)
+          </label>
           <input
-            type="date"
-            className="form-input"
-            value={expiryDate}
-            onChange={(e) => setExpiryDate(e.target.value)}
+            type="text"
+            className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 shadow-xs placeholder:text-slate-400"
+            value={partnerName}
+            onChange={(e) => setPartnerName(e.target.value)}
+            placeholder="Tên công ty hoặc đối tác ký kết..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Giá trị hợp đồng (VNĐ) *
+          </label>
+          <input
+            type="number"
+            step="1000000"
+            className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 shadow-xs"
+            value={value}
+            onChange={(e) => setValue(Number(e.target.value))}
+          />
+          <div className="text-xs text-slate-500 mt-1">
+            Quy đổi: <span className="font-semibold text-slate-800">{formatCurrency(value)}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Ngày hiệu lực *
+            </label>
+            <input
+              type="date"
+              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 shadow-xs"
+              value={effectiveDate}
+              onChange={(e) => setEffectiveDate(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Ngày hết hạn *
+            </label>
+            <input
+              type="date"
+              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 shadow-xs"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Đường dẫn tệp tài liệu đính kèm (URL)
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 shadow-xs placeholder:text-slate-400"
+            value={fileUrl}
+            onChange={(e) => setFileUrl(e.target.value)}
+            placeholder="https://..."
           />
         </div>
       </div>
 
-      <div className="form-group">
-        <label className="form-label">Đường dẫn tệp đính kèm (nếu có)</label>
-        <input
-          type="text"
-          className="form-input"
-          value={fileUrl}
-          onChange={(e) => setFileUrl(e.target.value)}
-          placeholder="https://..."
-        />
-      </div>
-
-      <div className="form-actions">
-        <button type="button" className="btn btn-outline" onClick={onCancel}>
-          Hủy bỏ
-        </button>
+      <div className="flex items-center justify-end gap-3 mt-8 pt-5 border-t border-slate-200">
         <button
           type="button"
-          className="btn btn-outline"
+          className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-4 py-2 rounded-lg font-medium shadow-xs transition-colors cursor-pointer"
+          onClick={onCancel}
+        >
+          Hủy bỏ
+        </button>
+
+        <button
+          type="button"
+          className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-4 py-2 rounded-lg font-medium shadow-xs transition-colors cursor-pointer"
           disabled={loading}
           onClick={() => handleSave(false)}
         >
           Lưu bản nháp
         </button>
+
         <button
           type="button"
-          className="btn btn-primary"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           disabled={loading}
           onClick={() => handleSave(true)}
         >
-          <IconSend size={13} />
+          <IconSend size={14} />
           <span>{loading ? 'Đang lưu...' : 'Lưu & Trình duyệt'}</span>
         </button>
       </div>

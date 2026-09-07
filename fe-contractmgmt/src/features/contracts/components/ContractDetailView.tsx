@@ -57,133 +57,169 @@ export const ContractDetailView: React.FC<Props> = ({ contract, onBack, onRefres
   const isActive = (step: number) => contract.status === step;
 
   return (
-    <div style={{ maxWidth: 900 }}>
-      {/* Action Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <button type="button" className="btn btn-outline btn-sm" onClick={onBack}>
-          <IconArrowLeft size={13} />
+    <div className="max-w-4xl">
+      {/* Top Action Bar */}
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <button
+          type="button"
+          className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3.5 py-1.5 rounded-lg font-medium shadow-xs transition-colors flex items-center gap-1.5 bg-white cursor-pointer"
+          onClick={onBack}
+        >
+          <IconArrowLeft size={14} />
           <span>Quay lại</span>
         </button>
 
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => window.print()}>
-            <IconPrinter size={13} />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3.5 py-1.5 rounded-lg font-medium shadow-xs transition-colors flex items-center gap-1.5 bg-white cursor-pointer"
+            onClick={() => window.print()}
+          >
+            <IconPrinter size={14} />
             <span>In</span>
           </button>
 
           {isDraft && (
             <button
               type="button"
-              className="btn btn-primary btn-sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               disabled={submitting}
               onClick={handleSubmitForApproval}
             >
-              <IconSend size={13} />
+              <IconSend size={14} />
               <span>{submitting ? 'Đang gửi...' : 'Trình duyệt'}</span>
             </button>
           )}
         </div>
       </div>
 
-      {message && <div className="alert alert-success">{message}</div>}
-      {error && <div className="alert alert-error">{error}</div>}
+      {message && (
+        <div className="p-3.5 mb-5 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg">
+          {message}
+        </div>
+      )}
 
-      {/* Contract Header */}
-      <div className="table-card" style={{ padding: '20px', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <span className="code-tag">
+      {error && (
+        <div className="p-3.5 mb-5 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {/* Header Info */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5 mb-5 shadow-xs">
+        <div className="flex items-center gap-2.5 mb-2.5">
+          <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200 text-slate-700 whitespace-nowrap inline-flex items-center gap-1.5">
             {contract.contractNumber}
-            <button type="button" className="btn-copy-code" onClick={handleCopyCode} title="Sao chép">
+            <button
+              type="button"
+              className="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer p-0.5"
+              onClick={handleCopyCode}
+              title="Sao chép"
+            >
               {copied ? <IconCheck size={12} color="#10b981" /> : <IconCopy size={12} />}
             </button>
           </span>
           <ContractBadge status={contract.status} />
         </div>
 
-        <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+        <h2 className="text-xl font-bold text-slate-900 mb-1">
           {contract.title}
         </h2>
-        <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
-          Phân loại: <strong>{contract.contractTypeName}</strong> • Đối tác: <strong>{contract.partnerName || 'Chưa cập nhật'}</strong>
+        <div className="text-xs text-slate-500">
+          Phân loại: <strong className="text-slate-700">{contract.contractTypeName}</strong> • Đối tác: <strong className="text-slate-700">{contract.partnerName || 'Chưa cập nhật'}</strong>
         </div>
       </div>
 
-      {/* Lifecycle Stepper */}
-      <div className="lifecycle-bar">
-        <div className={`lifecycle-step ${isPassed(0) ? 'passed' : isActive(0) ? 'active' : ''}`}>
-          <span className="step-circle">{isPassed(0) ? '✓' : '1'}</span>
+      {/* State Machine Stepper */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 mb-5 shadow-xs flex items-center justify-between text-xs font-medium">
+        <div className={`flex items-center gap-2 ${isPassed(0) ? 'text-emerald-600' : isActive(0) ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isPassed(0) ? 'bg-emerald-600 text-white' : isActive(0) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+            {isPassed(0) ? '✓' : '1'}
+          </span>
           <span>Bản nháp</span>
         </div>
-        <div className={`step-line ${isPassed(0) ? 'passed' : ''}`} />
+        <div className={`flex-1 h-0.5 mx-3 ${isPassed(0) ? 'bg-emerald-600' : 'bg-slate-200'}`} />
 
-        <div className={`lifecycle-step ${isPassed(1) ? 'passed' : isActive(1) ? 'active' : ''}`}>
-          <span className="step-circle">{isPassed(1) ? '✓' : '2'}</span>
+        <div className={`flex items-center gap-2 ${isPassed(1) ? 'text-emerald-600' : isActive(1) ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isPassed(1) ? 'bg-emerald-600 text-white' : isActive(1) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+            {isPassed(1) ? '✓' : '2'}
+          </span>
           <span>Chờ duyệt</span>
         </div>
-        <div className={`step-line ${isPassed(1) ? 'passed' : ''}`} />
+        <div className={`flex-1 h-0.5 mx-3 ${isPassed(1) ? 'bg-emerald-600' : 'bg-slate-200'}`} />
 
-        <div className={`lifecycle-step ${isPassed(2) ? 'passed' : isActive(2) ? 'active' : ''}`}>
-          <span className="step-circle">{isPassed(2) ? '✓' : '3'}</span>
+        <div className={`flex items-center gap-2 ${isPassed(2) ? 'text-emerald-600' : isActive(2) ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isPassed(2) ? 'bg-emerald-600 text-white' : isActive(2) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+            {isPassed(2) ? '✓' : '3'}
+          </span>
           <span>Đã duyệt</span>
         </div>
-        <div className={`step-line ${isPassed(2) ? 'passed' : ''}`} />
+        <div className={`flex-1 h-0.5 mx-3 ${isPassed(2) ? 'bg-emerald-600' : 'bg-slate-200'}`} />
 
-        <div className={`lifecycle-step ${isPassed(3) ? 'passed' : isActive(3) ? 'active' : ''}`}>
-          <span className="step-circle">{isPassed(3) ? '✓' : '4'}</span>
-          <span>Đã ký</span>
+        <div className={`flex items-center gap-2 ${isPassed(3) ? 'text-emerald-600' : isActive(3) ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isPassed(3) ? 'bg-emerald-600 text-white' : isActive(3) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+            {isPassed(3) ? '✓' : '4'}
+          </span>
+          <span>Đã ký số</span>
         </div>
-        <div className={`step-line ${isPassed(3) ? 'passed' : ''}`} />
+        <div className={`flex-1 h-0.5 mx-3 ${isPassed(3) ? 'bg-emerald-600' : 'bg-slate-200'}`} />
 
-        <div className={`lifecycle-step ${isPassed(4) ? 'passed' : isActive(4) ? 'active' : ''}`}>
-          <span className="step-circle">{isPassed(4) ? '✓' : '5'}</span>
+        <div className={`flex items-center gap-2 ${isPassed(4) ? 'text-emerald-600' : isActive(4) ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isPassed(4) ? 'bg-emerald-600 text-white' : isActive(4) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+            {isPassed(4) ? '✓' : '5'}
+          </span>
           <span>Hiệu lực</span>
         </div>
-        <div className={`step-line ${isPassed(4) ? 'passed' : ''}`} />
+        <div className={`flex-1 h-0.5 mx-3 ${isActive(7) ? 'bg-emerald-600' : 'bg-slate-200'}`} />
 
-        <div className={`lifecycle-step ${isActive(7) ? 'active' : ''}`}>
-          <span className="step-circle">{isActive(7) ? '✓' : '6'}</span>
+        <div className={`flex items-center gap-2 ${isActive(7) ? 'text-blue-600 font-semibold' : 'text-slate-400'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isActive(7) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+            6
+          </span>
           <span>Thanh lý</span>
         </div>
       </div>
 
-      {/* Specifications */}
-      <div className="table-card" style={{ padding: '20px' }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          Thông tin chi tiết
+      {/* Specifications Grid */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+        <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">
+          Thông tin chi tiết hợp đồng
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: 12, fontSize: 13 }}>
-          <div style={{ color: 'var(--color-text-muted)' }}>Giá trị hợp đồng:</div>
-          <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{formatCurrency(contract.value)}</div>
+        <dl className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-y-3 text-sm">
+          <dt className="text-slate-500">Giá trị hợp đồng:</dt>
+          <dd className="font-bold text-slate-900">{formatCurrency(contract.value)}</dd>
 
-          <div style={{ color: 'var(--color-text-muted)' }}>Thời hạn hiệu lực:</div>
-          <div>
+          <dt className="text-slate-500">Thời hạn hiệu lực:</dt>
+          <dd className="text-slate-800">
             {new Date(contract.effectiveDate).toLocaleDateString('vi-VN')} đến{' '}
             {new Date(contract.expiryDate).toLocaleDateString('vi-VN')}
-          </div>
+          </dd>
 
-          <div style={{ color: 'var(--color-text-muted)' }}>Người tạo:</div>
-          <div>{contract.ownerName}</div>
+          <dt className="text-slate-500">Người tạo hồ sơ:</dt>
+          <dd className="text-slate-800">{contract.ownerName}</dd>
 
-          <div style={{ color: 'var(--color-text-muted)' }}>Ngày tạo:</div>
-          <div>{new Date(contract.createdAt).toLocaleString('vi-VN')}</div>
+          <dt className="text-slate-500">Thời gian tạo:</dt>
+          <dd className="text-slate-800">{new Date(contract.createdAt).toLocaleString('vi-VN')}</dd>
 
-          <div style={{ color: 'var(--color-text-muted)' }}>Tệp đính kèm:</div>
-          <div>
+          <dt className="text-slate-500">Tệp đính kèm:</dt>
+          <dd>
             {contract.fileUrl ? (
-              <a href={contract.fileUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--color-primary)' }}>
+              <a href={contract.fileUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
                 {contract.fileUrl}
               </a>
             ) : (
-              'Không có tệp đính kèm'
+              <span className="text-slate-400">Không có tệp đính kèm</span>
             )}
-          </div>
+          </dd>
 
-          <div style={{ color: 'var(--color-text-muted)' }}>Mã phiên bản (RowVersion):</div>
-          <div>
-            <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{contract.rowVersion || '0x000000000001B4'}</code>
-          </div>
-        </div>
+          <dt className="text-slate-500">Mã khóa (RowVersion):</dt>
+          <dd>
+            <code className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-slate-700">
+              {contract.rowVersion || '0x000000000001B4'}
+            </code>
+          </dd>
+        </dl>
       </div>
     </div>
   );
