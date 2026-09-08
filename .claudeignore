@@ -1,27 +1,50 @@
-# Build & Packages
+# Build Artifacts & Output
 bin/
 obj/
-node_modules/
+**/bin/
+**/obj/
 dist/
+**/dist/
 build/
-.vs/
-.vscode/
+**/build/
 
-# Package caches
+# Node & Package Managers
+node_modules/
+**/node_modules/
+package-lock.json
+**/package-lock.json
+.vite/
+**/.vite/
+
+# IDE & Editor Caches
+.vs/
+**/.vs/
+.vscode/
+**/.vscode/
 *.user
 *.suo
 project.assets.json
 *.nuget.cache
+*.cache
 
-# Environment
+# Private Plans & Scratch
+local-plans/
+local-plans/**
+temp/
+scratch/
+
+# Environment & Secrets
 .env
 .env.*
+!.env.example
 
-# Logs
+# Logs & Diagnostics
 *.log
 logs/
 
-# Documents & Binaries
+# Binary & Document Assets
 *.docx
 *.pdf
 *.zip
+*.tar
+*.gz

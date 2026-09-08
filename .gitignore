@@ -1,4 +1,4 @@
-# Visual Studio / Rider
+# Visual Studio / Rider / IDE Caches
 .vs/
 **/.vs/
 *.user
@@ -6,7 +6,7 @@
 *.sln.docstates
 *.suo
 
-# .NET Build artifacts
+# .NET Build Artifacts
 bin/
 obj/
 **/bin/
@@ -15,28 +15,30 @@ obj/
 *.exe
 *.pdb
 
-# Node / Frontend
+# Node / Frontend Build & Caches
 node_modules/
-dist/
 **/node_modules/
+dist/
 **/dist/
+.vite/
+**/.vite/
 .eslintcache
 
-# Environment files & Secrets
+# Environment Files & Local Secrets
 .env
 .env.*
 !.env.example
-appsettings*.Development.json
 
-# Logs & Temp
+# Logs & Temporary Files
 *.log
 logs/
 temp/
 scratch/
 
-# Local development plans (Private - not pushed to Git)
+# Local Development Plans (Private - Never Tracked)
 local-plans/
+local-plans/**
 
-# OS generated
+# OS Generated Files
 .DS_Store
 Thumbs.db
