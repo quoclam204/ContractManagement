@@ -1,0 +1,62 @@
+stateDiagram-v2
+    %% Style definitions
+    %% States
+    [*] --> Draft
+    Draft --> PendingApproval: Submit for Approval
+    PendingApproval --> Approved: All Approvals Received
+    PendingApproval --> Draft: Rejected - Return for Revision
+    Approved --> Signed: All Parties Signed
+    Signed --> Active: Effective Date Reached
+    Active --> Expiring: Notice Period Started
+    Expiring --> Renewed: Renewal Agreement Signed
+    Expiring --> Terminated: Termination Notice Acted Upon
+    Active --> Terminated: Early Termination Agreement
+    Renewed --> Active: New Term Begins
+    Terminated --> [*]
+    
+    %% Additional possible transitions
+    Draft --> [*]: Abandoned
+    PendingApproval --> [*]: Process Cancelled
+    Approved --> [*]: Approval Revoked (Legal)
+    Signed --> [*]: Contract Void (Legal)
+    Active --> [*]: Expired (No Action Taken)
+    
+    %% State descriptions
+    state Draft {
+        [*] --> Editing
+        Editing --> Review: Request Internal Review
+        Review --> Editing: Changes Needed
+        Review --> Draft: Review Complete
+    }
+    
+    state PendingApproval {
+        [*] --> Routing
+        Routing --> Waiting: Sent to Approvers
+        Waiting --> Approved: All Approved
+        Waiting --> Rejected: Any Rejection
+        state Rejected {
+            [*] --> Notification
+            Notification --> Revision: Request for Revision
+            Revision --> Editing: Make Changes
+            Editing --> Routing: Resubmit for Approval
+        }
+    }
+    
+    %% Style the states
+    classDef draft fill:#E3F2FD,stroke:#1565C0;
+    classDef pending fill:#FFF3E0,stroke:#EF6C00;
+    classDef approved fill:#E8F5E8,stroke:#2E7D32;
+    classDef signed fill:#F3E5F5,stroke:#6A1B9A;
+    classDef active fill:#FFEBEE,stroke:#C62828;
+    classDef expiring fill:#FCE4EC,stroke:#880E4F;
+    classDef renewed fill:#FFF8E1,stroke:#FF6F00;
+    classDef terminated fill:#F5F5F5,stroke:#616161;
+    
+    class Draft,draft;
+    class PendingApproval,pending;
+    class Approved,approved;
+    class Signed,signed;
+    class Active,active;
+    class Expiring,expiring;
+    class Renewed,renewed;
+    class Terminated,terminated;

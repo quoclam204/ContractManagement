@@ -1,6 +1,6 @@
 HỆ THỐNG QUẢN LÝ HỢP ĐỒNG DOANH NGHIỆP
 (Contract Lifecycle Management System — CLM)
-Tài liệu Kiến trúc, SRS & Phân công Nhóm 5 người | .NET 9 + React
+Tài liệu Kiến trúc, SRS & Phân công Nhóm 5 người | .NET 10 + React
 Phiên bản 2 — cập nhật theo review kiến trúc & phân công
 Ghi chú phiên bản 2
 Tài liệu đã được cập nhật theo góp ý kiến trúc trước khi implement (Modular Monolith thay vì Microservices, MediatR không bắt buộc, storage qua abstraction, Hangfire + RabbitMQ, Outbox/Idempotent Consumer, Logging & Monitoring, tách Workflow config/runtime, versioning Template & Workflow, E-signature dùng Mock/OTP cho MVP, ưu tiên lại phạm vi AI và Testing) và cập nhật lại cách phân công nhóm theo yêu cầu: 1 người làm lead kiêm giữ kiến trúc/convention, cả 5 người đều code và chia đều task, tập trung backend .NET nhưng mỗi sprint phải có ít nhất 1 flow người dùng dùng được (end-to-end).
@@ -73,9 +73,9 @@ Controller → Application Service / Use Case → Domain → Infrastructure.
 MediatR/CQRS: không bắt buộc.
  Team có thể giữ flow đơn giản như trên (Use Case class thuần, không qua MediatR pipeline) — vẫn đảm bảo separation of concerns nhưng dễ trace và debug hơn khi mới làm quen kiến trúc. Nhóm nào quen CQRS có thể vẫn dùng MediatR cho module của mình, miễn convention nhất quán trong cùng module.
 2.2. Bảng công nghệ
-BACKEND (.NET 9)
+BACKEND (.NET 10)
 FRONTEND & AI
-ASP.NET Core Web API (.NET 9)
+ASP.NET Core Web API (.NET 10)
 Modular Monolith, layering Controller → Application/Use Case → Domain → Infrastructure
 Clean Architecture cho cấu trúc thư mục; MediatR/CQRS không bắt buộc, dùng khi phù hợp
 Entity Framework Core + SQL Server

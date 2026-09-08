@@ -1,0 +1,52 @@
+sequenceDiagram
+    participant User as User
+    participant ContractModule as Contract Module
+    participant StorageModule as Storage Module
+    participant AIModule as AI Module
+    participant NotificationModule as Notification Module
+    participant ExternalAI as External AI Service
+    
+    %% Upload Process
+    User->>ContractModule: Request Contract Upload
+    ContractModule->>User: Show Upload Form
+    User->>ContractModule: Submit Contract File + Metadata
+    
+    %% Validation and Storage
+    ContractModule->>ContractModule: Validate File Type/Size
+    ContractModule->>StorageModule: Store Contract Document
+    StorageModule-->>ContractModule: Storage Reference (ID/Path)
+    ContractModule->>ContractModule: Save Metadata with Storage Reference
+    
+    %% AI Analysis Trigger (Optional/Configurable)
+    alt AI Analysis Enabled for Contract Type
+        ContractModule->>AIModule: Request AI Analysis
+        AIModule->>StorageModule: Retrieve Document by Reference
+        StorageModule-->>AIModule: Document Content
+        AIModule->>ExternalAI: Send Document for Analysis
+        ExternalAI-->>AIModule: Analysis Results (Clauses, Risks, etc.)
+        AIModule->>AIModule: Process Results (Format, Confidence Scoring)
+        AIModule->>ContractModule: Return Analysis Results
+        ContractModule->>ContractModule: Store Analysis Results
+        ContractModule->>NotificationModule: Notify Stakeholders (if configured)
+        NotificationModule->>User: Analysis Complete Notification
+    else AI Analysis Disabled/Manual
+        ContractModule->>ContractModule: Skip AI Analysis
+        ContractModule->>User: Upload Complete (Analysis Not Requested)
+    end
+    
+    %% Manual AI Analysis Trigger (User Initiated)
+    User->>ContractModule: Request AI Analysis (Later)
+    ContractModule->>StorageModule: Verify Document Exists
+    StorageModule-->>ContractModule: Document Confirmation
+    ContractModule->>AIModule: Request AI Analysis
+    %% ... same analysis flow as above ...
+    
+    %% Analysis Results Usage
+    ContractModule->>ContractModule: Make Analysis Available in UI
+    User->>ContractModule: View Analysis Results
+    ContractModule->>User: Display Analysis (Summary, Details, Recommendations)
+    
+    %% Feedback Loop (Optional)
+    User->>ContractModule: Provide Feedback on Analysis
+    ContractModule->>AIModule: Send Feedback for Model Improvement
+    AIModule->>ExternalAI: Update Model (if applicable)
