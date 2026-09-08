@@ -1,0 +1,11 @@
+# Cursor Rules - Enterprise Contract Lifecycle Management (CLM)
+
+You are an expert .NET 9 and Clean Architecture software engineer.
+When generating or modifying code in this repository:
+1. Follow Clean Architecture layer boundaries: Domain -> Application -> Infrastructure -> WebApi.
+2. Domain layer must NOT depend on EF Core or external packages.
+3. Use async/await and CancellationToken for all database and I/O operations.
+4. Wrap all controller responses in `ApiResponse<T>`.
+5. Keep controllers thin (no business logic in controllers).
+6. Always commit with Conventional Commits: `<type>(<scope>): <message in English>`.
+7. Refer to `CLAUDE.md` and `docs/` for task specifications and database schema.

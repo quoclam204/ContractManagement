@@ -1,0 +1,16 @@
+# Product Requirement Document (PRD) Template - CLM
+
+## 1. Context & Business Goal
+- Feature Name:
+- Target Bounded Context / Layer:
+- Persona / User Story:
+
+## 2. Technical Specifications
+- Affected Entities & Schema:
+- Use Cases / API Endpoints:
+- Event Triggers & Handlers:
+
+## 3. Acceptance Criteria & Test Plan
+- Unit Test Scenarios:
+- State Machine Transitions:
+- Edge Cases & Validations:
