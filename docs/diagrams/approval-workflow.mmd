@@ -1,0 +1,59 @@
+sequenceDiagram
+    participant ContractModule as Contract Module
+    participant WorkflowModule as Workflow Module
+    participant IdentityModule as Identity Module
+    participant NotificationModule as Notification Module
+    participant StorageModule as Storage Module
+    
+    %% Actor
+    actor User as Contract Owner/User
+    actor Approver as Approver/Reviewer
+    
+    %% Contract Creation and Submission
+    User->>ContractModule: Create New Contract
+    ContractModule-->>User: Contract Created (Draft)
+    User->>ContractModule: Submit for Approval
+    
+    %% Workflow Initiation
+    ContractModule->>WorkflowModule: Initiate Approval Workflow
+    WorkflowModule->>IdentityModule: Get Approver List (from Contract)
+    IdentityModule-->>WorkflowModule: Return Approver Roles/Users
+    WorkflowModule->>WorkflowModule: Determine Approval Sequence
+    
+    %% Notification Setup
+    WorkflowModule->>NotificationModule: Configure Approval Notifications
+    NotificationModule-->>WorkflowModule: Notification Rules Set
+    
+    %% First Approval Step
+    WorkflowModule->>NotificationModule: Send Approval Request (Approver 1)
+    NotificationModule->>Approver: Notification (Email/In-App)
+    Approver->>NotificationModule: View Approval Request
+    NotificationModule->>WorkflowModule: Approver Accessed Request
+    
+    %% Approver Action
+    Approver->>WorkflowModule: Submit Approval (Approve/Reject)
+    alt Approved
+        WorkflowModule->>WorkflowModule: Check if More Approvers Needed
+        alt More Approvers
+            WorkflowModule->>NotificationModule: Send Approval Request (Approver 2)
+            NotificationModule->>Approver2: Notification (Email/In-App)
+            %% ... continues for all approvers
+        else Final Approval
+            WorkflowModule->>ContractModule: Approval Complete
+            ContractModule->>ContractModule: Update Status to Approved
+            ContractModule->>NotificationModule: Notify Contract Owner
+            NotificationModule->>User: Approval Complete Notification
+    else Rejected
+        WorkflowModule->>ContractModule: Approval Rejected
+        ContractModule->>ContractModule: Update Status to Draft (Rejected)
+        ContractModule->>NotificationModule: Notify Contract Owner & Approver
+        NotificationModule->>User: Approval Rejected Notification
+        NotificationModule->>Approver: Rejection Recorded
+    end
+    
+    %% Post-Approval Actions
+    ContractModule->>StorageModule: Store Final Approved Contract
+    StorageModule-->>ContractModule: Storage Confirmation
+    
+    %% Optional: Trigger next workflow (e.g., signing)
+    ContractModule->>WorkflowModule: Initiate Signing Workflow (if applicable)

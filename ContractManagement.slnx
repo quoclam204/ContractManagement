@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ContractManagement.Api/ContractManagement.Api.csproj" />
+    <Project Path="src/ContractManagement.Application/ContractManagement.Application.csproj" />
+    <Project Path="src/ContractManagement.Domain/ContractManagement.Domain.csproj" />
+    <Project Path="src/ContractManagement.Infrastructure/ContractManagement.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ContractManagement.IntegrationTests/ContractManagement.IntegrationTests.csproj" />
+    <Project Path="tests/ContractManagement.UnitTests/ContractManagement.UnitTests.csproj" />
+  </Folder>
+</Solution>

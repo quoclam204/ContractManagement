@@ -1,0 +1,78 @@
+flowchart TD
+    %% Style definitions
+    classDef api fill:#E3F2FD,stroke:#1565C0,stroke-width:2px;
+    classDef application fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px;
+    classDef domain fill:#E8F5E8,stroke:#2E7D32,stroke-width:2px;
+    classDef infrastructure fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px;
+    classDef external fill:#FFEBEE,stroke:#C62828,stroke-width:2px,stroke-dasharray: 5 5;
+    
+    %% API Layer
+    subgraph API["API Layer"]
+        direction TB
+        Controllers[Controllers] --> Middleware[Middleware]
+        OpenAPI[OpenAPI/Swagger Docs]
+        HealthChecks[Health Check Endpoints]
+        class Controllers,Middleware,OpenAPI,HealthChecks api;
+    end
+    
+    %% Application Layer
+    subgraph Application["Application Layer"]
+        direction TB
+        UseCases[Use Cases/Services] --> DTOs[DTOs]
+        Ports[Ports (Interfaces)]
+        class UseCases,DTOs,Ports application;
+    end
+    
+    %% Domain Layer
+    subgraph Domain["Domain Layer"]
+        direction TB
+        Entities[Entities & Value Objects] --> DomainServices[Domain Services]
+        DomainEvents[Domain Events]
+        BusinessRules[Business Rules & Validation]
+        class Entities,DomainServices,DomainEvents,BusinessRules domain;
+    end
+    
+    %% Infrastructure Layer
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        Persistence[EF Core Persistence] --> Repositories[Repositories]
+        ExternalServices[External Service Integrations] --> Messaging[Messaging (RabbitMQ)]
+        BackgroundJobs[Background Jobs (Hangfire)]
+        StorageImpl[Storage Implementations]
+        AIProviders[AI Provider Implementations]
+        class Persistence,Repositories,ExternalServices,Messaging,BackgroundJobs,StorageImpl,AIProviders infrastructure;
+    end
+    
+    %% External Systems
+    subgraph External["External Systems"]
+        direction TB
+        DB[(SQL Server)] --> Email[Email Service]
+        PaymentGateways[Payment Gateways] --> StorageSvc[Storage Services (S3/Azure)]
+        AIProvidersExt[AI Services (External)]
+        class DB,Email,PaymentGateways,StorageSvc,AIProvidersExt external;
+    end
+    
+    %% Data Flow
+    API -->|HTTP Requests/Responses| Application
+    Application -->|Use Case Calls| Domain
+    Domain -->|Domain Events| Application
+    Application -->|Interface Calls| Infrastructure
+    Infrastructure -->|Database Queries/Commands| DB
+    Infrastructure -->|API Calls| ExternalServices
+    Infrastructure -->|Messages| Messaging
+    Infrastructure -->|Storage API| StorageSvc
+    Infrastructure -->|AI API| AIProvidersExt
+    
+    %% Cross-cutting concerns (aspects that span layers)
+    %% These would be implemented as middleware, decorators, or interceptors
+    style CrossCutting fill:#FFF9C4,stroke:#F57F17,stroke-width:2px,stroke-dasharray: 5 5
+    
+    %% Legend
+    subgraph Legend["Legend"]
+        direction LR
+        ApiStyle[API Layer]:::api
+        AppStyle[Application Layer]:::application
+        DomStyle[Domain Layer]:::domain
+        InfraStyle[Infrastructure Layer]:::infrastructure
+        ExtStyle[External Systems]:::external
+    end
