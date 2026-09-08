@@ -27,9 +27,8 @@ ContractManagement/
 │   ├── processes/                             # Quy chuẩn Git, Commit và Mẫu báo cáo hàng ngày
 │   ├── tasks/                                 # Roadmap và phân công nhiệm vụ thành viên
 │   └── git/                                   # Hướng dẫn tách Repository
-├── CLAUDE.md                                  # Ngữ cảnh và quy chuẩn kỹ thuật cho AI
-├── .cursorrules                               # Cấu hình quy tắc cho Cursor Editor
-├── AGENTS.md                                  # Chỉ dẫn cho AI Agents
+├── AGENTS.md                                  # Hiến pháp hệ thống chỉ dẫn AI toàn diện (Single Source of Truth)
+├── .claudeignore                              # Chặn quét thư mục rác/build để tối ưu token
 └── .gitignore                                 # Loại trừ tệp rác, build artifacts và caches
 ```
 
@@ -63,7 +62,7 @@ Giao diện ứng dụng chạy tại: `http://localhost:5173`.
 
 ## 📋 Quy Chuẩn Kỹ Thuật (Engineering Standards)
 
-1. **AI & Prompting Context**: Đọc kỹ [CLAUDE.md](CLAUDE.md) và [.cursorrules](.cursorrules) trước khi phát triển.
+1. **AI & Prompting Master Guide**: Đọc kỹ [AGENTS.md](AGENTS.md) trước khi phân tích hoặc sinh mã nguồn.
 2. **Quy ước Commit**: Bắt buộc tuân thủ chuẩn **Conventional Commits** (Xem chi tiết tại [docs/processes/GIT_WORKFLOW_AND_COMMIT_GUIDE.md](docs/processes/GIT_WORKFLOW_AND_COMMIT_GUIDE.md)).
 3. **Báo cáo hàng ngày**: Áp dụng mẫu tại [docs/processes/DAILY_REPORT_TEMPLATE.md](docs/processes/DAILY_REPORT_TEMPLATE.md).
 4. **Hướng dẫn tách Repo**: Xem hướng dẫn tại [docs/git/SPLIT_REPO_GUIDE.md](docs/git/SPLIT_REPO_GUIDE.md).
