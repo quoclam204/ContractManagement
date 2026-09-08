@@ -1,0 +1,60 @@
+sequenceDiagram
+    participant User as User/Approver
+    participant WorkflowModule as Workflow Module
+    participant ContractModule as Contract Module
+    participant NotificationModule as Notification Module
+    participant IdentityModule as Identity Module
+    
+    %% Approval Process
+    User->>WorkflowModule: Submit Approval Decision
+    WorkflowModule->>IdentityModule: Validate User Permissions
+    IdentityModule-->>WorkflowModule: Permission Granted/Denied
+    
+    alt Permission Denied
+        WorkflowModule->>User: Error - Insufficient Permissions
+    else Permission Granted
+        WorkflowModule->>WorkflowModule: Record Approval Decision
+        WorkflowModule->>WorkflowModule: Evaluate Workflow State
+        
+        alt More Approvals Required
+            WorkflowModule->>NotificationModule: Notify Next Approver
+            NotificationModule->>User2: Approval Request Notification
+            Note over NotificationModule: Email/In-App/Push
+            
+        else Final Approval Received
+            WorkflowModule->>ContractModule: Workflow Completed Successfully
+            ContractModule->>ContractModule: Update Contract Status
+            ContractModule->>ContractModule: Set Status to Approved
+            
+            %% Notification Triggers
+            WorkflowModule->>NotificationModule: Trigger Workflow Completion Notification
+            NotificationModule->>ContractOwner: Approval Complete Notification
+            NotificationModule->>AllStakeholders: Workflow Finished Notification
+            
+            %% Optional: Trigger Next Process
+            ContractModule->>NotificationModule: Trigger Next Process (e.g., Contract Activation)
+            NotificationModule->>RelevantParties: Next Process Initiated Notification
+        end
+    end
+    
+    %% Rejection Path
+    alt Approval Rejected
+        WorkflowModule->>ContractModule: Workflow Terminated (Rejected)
+        ContractModule->>ContractModule: Update Contract Status to Draft/Rejected
+        WorkflowModule->>NotificationModule: Trigger Rejection Notification
+        NotificationModule->>ContractOwner: Approval Rejected Notification
+        NotificationModule->>RejectedApprover: Rejection Recorded
+        NotificationModule->>ProcessOwner: Workflow Termination Notice
+    end
+    
+    %% Notification Details
+    NotificationModule->>NotificationModule: Determine Notification Channels
+    NotificationModule->>NotificationModule: Personalize Message Content
+    NotificationModule->>EmailService: Send Email Notification
+    NotificationModule->>InAppService: Create In-App Notification
+    NotificationModule->>PushService: Send Push Notification (if configured)
+    NotificationModule->>SMSService: Send SMS Notification (if configured)
+    
+    %% Audit Trail
+    WorkflowModule->>ContractModule: Log Decision in Audit Trail
+    ContractModule->>StorageModule: Store Audit Record

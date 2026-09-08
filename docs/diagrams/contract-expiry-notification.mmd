@@ -1,0 +1,75 @@
+sequenceDiagram
+    participant Scheduler as Scheduler/Timer Service
+    participant ContractModule as Contract Module
+    participant NotificationModule as Notification Module
+    participant IdentityModule as Identity Module
+    participant StorageModule as Storage Module
+    
+    %% Scheduled Check for Expiring Contracts
+    Scheduler->>ContractModule: Daily Expiry Check Trigger
+    
+    ContractModule->>ContractModule: Query Contracts Expiring in X Days
+    ContractModule-->>Scheduler: List of Expiring Contracts
+    
+    loop For Each Expiring Contract
+        ContractModule->>ContractModule: Load Contract Details
+        ContractModule->>IdentityModule: Get Contract Owner/Stakeholders
+        IdentityModule-->>ContractModule: Owner and Stakeholder List
+        ContractModule->>StorageModule: Retrieve Contract Document (if needed)
+        StorageModule-->>ContractModule: Document Reference
+        
+        alt Contract Requires Renewal Action
+            ContractModule->>NotificationModule: Prepare Renewal Notification
+            NotificationModule->>ContractOwner: Renewal Required Notification
+            NotificationModule->>LegalTeam: Renewal Required Notification
+            NotificationModule->>Management: Renewal Required Notification
+            
+            %% Include contract details and renewal options
+            NotificationModule->>EmailService: Send Renewal Notice
+            NotificationModule->>InAppService: Create Renewal Alert
+            
+        else Contract Will Expire (No Renewal)
+            ContractModule->>NotificationModule: Prepare Expiry Notification
+            NotificationModule->>ContractOwner: Contract Expiring Notification
+            NotificationModule->>BillingTeam: Contract Expiring Notification
+            NotificationModule->>ServiceTeam: Contract Expiring Notification
+            
+            %% Include expiry date and impact information
+            NotificationModule->>EmailService: Send Expiry Notice
+            NotificationModule->>InAppService: Create Expiry Alert
+            
+        else Contract Auto-Renews
+            ContractModule->>NotificationModule: Prepare Auto-Renewal Notice
+            NotificationModule->>ContractOwner: Auto-Renewal Notification
+            NotificationModule->>FinanceTeam: Auto-Renewal Notification
+            
+            %% Include renewal terms and opt-out instructions
+            NotificationModule->>EmailService: Send Auto-Renewal Notice
+            NotificationModule->>InAppService: Create Auto-Renewal Alert
+        end
+        
+        %% Update notification tracking
+        ContractModule->>ContractModule: Record Notification Sent
+        ContractModule->>StorageModule: Update Notification Log
+    end
+    
+    %% Special Cases
+    alt Contract Already Renewed/Extended
+        ContractModule->>ContractModule: Skip Notification (Already Handled)
+    else Contract In Dispute/Litigation
+        ContractModule->>NotificationModule: Send Legal Hold Notification
+        NotificationModule->>LegalTeam: Contract Legal Hold Notice
+    end
+    
+    %% Escalation Notifications (if not acknowledged)
+    Scheduler->>ContractModule: Check for Unacknowledged Notifications
+    ContractModule->>ContractModule: Find Unacknowledged Expiry Notices
+    alt Unacknowledged Notices Exist
+        ContractModule->>NotificationModule: Send Escalation Notifications
+        NotificationModule->>Manager: Escalation - Contract Expiring Soon
+        NotificationModule->>Director: Escalation - Immediate Action Required
+    end
+    
+    %% Audit and Reporting
+    ContractModule->>StorageModule: Log All Expiry Notifications Sent
+    ContractModule->>NotificationModule: Generate Expiry Report (Monthly/Quarterly)

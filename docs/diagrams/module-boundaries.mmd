@@ -1,0 +1,139 @@
+flowchart LR
+    %% Style definitions
+    classDef identity fill:#E3F2FD,stroke:#1565C0,stroke-width:2px;
+    classDef contract fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px;
+    classDef workflow fill:#E8F5E8,stroke:#2E7D32,stroke-width:2px;
+    classDef partner fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px;
+    classDef payment fill:#FFEBEE,stroke:#C62828,stroke-width:2px;
+    classDef storage fill:#FCE4EC,stroke:#880E4F,stroke-width:2px;
+    classDef notification fill:#FFF8E1,stroke:#FF6F00,stroke-width:2px;
+    classDef ai fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px;
+    classDef shared fill:#FFF9C4,stroke:#F57F17,stroke-width:2px,stroke-dasharray: 5 5;
+    
+    %% Modules
+    subgraph IdentityMod[Identity]
+        Users[Users & Profiles]
+        Roles[Roles & Permissions]
+        Auth[Authentication]
+        class Users,Roles,Auth identity;
+    end
+    
+    subgraph ContractMod[Contract]
+        Contracts[Contract Entities]
+        Terms[Contract Terms & Conditions]
+        Lifecycle[Contract Lifecycle]
+        class Contracts,Terms,Lifecycle contract;
+    end
+    
+    subgraph WorkflowMod[Workflow]
+        Workflows[Workflow Definitions]
+        Approvals[Approval Processes]
+        Tasks[Task Assignments]
+        class Workflows,Approvals,Tasks workflow;
+    end
+    
+    subgraph PartnerMod[Partner]
+        Partners[Partner/Vendor Entities]
+        Relationships[Relationship Management]
+        class Partners,Relationships partner;
+    end
+    
+    subgraph PaymentMod[Payment]
+        Invoices[Invoices & Billing]
+        Transactions[Payment Transactions]
+        Methods[Payment Methods]
+        class Invoices,Transactions,Methods payment;
+    end
+    
+    subgraph StorageMod[Storage]
+        Documents[Document Management]
+        Attachments[File Attachments]
+        Metadata[File Metadata & Versioning]
+        class Documents,Attachments,Metadata storage;
+    end
+    
+    subgraph NotificationMod[Notification]
+        Templates[Notification Templates]
+        Channels[Delivery Channels]
+        Queues[Notification Queues]
+        class Templates,Channels,Queues notification;
+    end
+    
+    subgraph AIMod[AI]
+        Analysis[Contract Analysis]
+        Extraction[Clause Extraction]
+        Recommendations[AI Recommendations]
+        class Analysis,Extraction,Recommendations ai;
+    end
+    
+    %% Shared Kernel (minimal)
+    subgraph SharedKernel[Shared Kernel]
+        BaseTypes[Base Types & Enums]
+        Exceptions[Common Exceptions]
+        Interfaces[Shared Interfaces]
+        class BaseTypes,Exceptions,Interfaces shared;
+    end
+    
+    %% Dependencies (showing allowed directions)
+    IdentityMod -->|Supports| ContractMod
+    IdentityMod -->|Supports| WorkflowMod
+    IdentityMod -->|Supports| PartnerMod
+    IdentityMod -->|Supports| PaymentMod
+    IdentityMod -->|Supports| StorageMod
+    IdentityMod -->|Supports| NotificationMod
+    IdentityMod -->|Supports| AIMod
+    
+    ContractMod -->|Uses| IdentityMod
+    ContractMod -->|Triggers| WorkflowMod
+    ContractMod -->|References| PartnerMod
+    ContractMod -->|Generates| PaymentMod
+    ContractMod -->|Stores in| StorageMod
+    ContractMod -->|Notifies| NotificationMod
+    ContractMod -->|Analyzed by| AIMod
+    
+    WorkflowMod -->|Uses| IdentityMod
+    WorkflowMod -->|Operates on| ContractMod
+    WorkflowMod -->|Assigns Tasks to| IdentityMod
+    WorkflowMod -->|Triggers| NotificationMod
+    
+    PartnerMod -->|Used by| ContractMod
+    PartnerMod -->|Used by| PaymentMod
+    
+    PaymentMod -->|Based on| ContractMod
+    PaymentMod -->|References| PartnerMod
+    PaymentMod -->|Triggers| NotificationMod
+    
+    StorageMod -->|Used by| ContractMod
+    StorageMod -->|Used by| AIMod
+    
+    NotificationMod -->|Triggered by| ContractMod
+    NotificationMod -->|Triggered by| WorkflowMod
+    NotificationMod -->|Triggered by| PaymentMod
+    
+    AIMod -->|Analyzes| StorageMod
+    AIMod -->|Provides insights to| ContractMod
+    AIMod -->|Provides insights to| WorkflowMod
+    
+    %% Shared kernel dependencies
+    IdentityMod -->|Uses| SharedKernel
+    ContractMod -->|Uses| SharedKernel
+    WorkflowMod -->|Uses| SharedKernel
+    PartnerMod -->|Uses| SharedKernel
+    PaymentMod -->|Uses| SharedKernel
+    StorageMod -->|Uses| SharedKernel
+    NotificationMod -->|Uses| SharedKernel
+    AIMod -->|Uses| SharedKernel
+    
+    %% Legend
+    subgraph Legend["Legend"]
+        direction LR
+        IdStyle[Identity]:::identity
+        CtStyle[Contract]:::contract
+        WfStyle[Workflow]:::workflow
+        PrStyle[Partner]:::partner
+        PyStyle[Payment]:::payment
+        StStyle[Storage]:::storage
+        NtStyle[Notification]:::notification
+        AiStyle[AI]:::ai
+        ShStyle[Shared Kernel]:::shared
+    end

@@ -1,0 +1,90 @@
+openapi: 3.0.3
+info:
+  title: Contract Management System API
+  description: Foundation API specification for the Contract Management System (CLM)
+  version: 1.0.0
+  contact:
+    name: CLM Development Team
+    email: dev-team@company.com
+
+servers:
+  - url: https://api.contractmanagement.com/v1
+    description: Production server
+  - url: https://api-dev.contractmanagement.com/v1
+    description: Development server
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the API service
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy]
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: 2026-09-08T10:00:00Z
+                  version:
+                    type: string
+                    example: 1.0.0
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [unhealthy]
+                    example: unhealthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  error:
+                    type: string
+                    example: Service dependencies unavailable
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          format: date-time
+          description: Time of error
+        path:
+          type: string
+          description: Request path that caused the error
+
+securitySchemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Health
+    description: Health check and monitoring endpoints

@@ -1,0 +1,126 @@
+flowchart TD
+    %% Style definitions for layers
+    classDef api fill:#E3F2FD,stroke:#1565C0,stroke-width:3px;
+    classDef application fill:#FFF3E0,stroke:#EF6C00,stroke-width:3px;
+    classDef domain fill:#E8F5E8,stroke:#2E7D32,stroke-width:3px;
+    classDef infrastructure fill:#F3E5F5,stroke:#6A1B9A,stroke-width:3px;
+    classDef legal fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px;
+    classDef illegal fill:#FFCDD2,stroke:#C62828,stroke-width:2px,stroke-dasharray: 5 5;
+    
+    %% Layers
+    subgraph Layers["Architecture Layers"]
+        direction TB
+        API[API Layer]:::api
+        APP[Application Layer]:::application
+        DOM[Domain Layer]:::domain
+        INFRA[Infrastructure Layer]:::infrastructure
+    end
+    
+    %% Legal dependencies (green arrows)
+    APP -.->|Depends on| DOM:::legal
+    INFRA -.->|Depends on| APP:::legal
+    INFRA -.->|Depends on| DOM:::legal
+    API -.->|Depends on (DI/Composition)| APP:::legal
+    API -.->|Depends on (DI/Composition)| INFRA:::legal
+    
+    %% Illegal dependencies (red dashed arrows)
+    DOM -.->|FORBIDDEN: Depends on| APP:::illegal
+    DOM -.->|FORBIDDEN: Depends on| INFRA:::illegal
+    DOM -.->|FORBIDDEN: Depends on| API:::illegal
+    APP -.->|FORBIDDEN: Depends on| INFRA:::illegal
+    APP -.->|FORBIDDEN: Depends on| API:::illegal
+    API -.->|FORBIDDEN: Depends on| DOM:::illegal
+    
+    %% External dependencies that infrastructure may have
+    subgraph ExternalDeps["Infrastructure External Dependencies"]
+        direction TB
+        DB[(SQL Server)]
+        MQ[(RabbitMQ)]
+        HF[(Hangfire)]
+        ST[(Storage Services)]
+        AI[(AI Services)]
+        class DB,MQ,HF,ST,AI infrastructure;
+    end
+    
+    INFRA -.->|Implements| DB:::legal
+    INFRA -.->|Implements| MQ:::legal
+    INFRA -.->|Implements| HF:::legal
+    INFRA -.->|Implements| ST:::legal
+    INFRA -.->|Implements| AI:::legal
+    
+    %% API concerns
+    subgraph APIConcerns["API Layer Concerns"]
+        direction TB
+        Ctrl[Controllers]
+        Midd[Middleware]
+        Auth[Auth/Authorization]
+        Health[Health Checks]
+        Docs[OpenAPI/Docs]
+        class Ctrl,Midd,Auth,Health,Docs api;
+    end
+    
+    API --> Ctrl
+    API --> Midd
+    API --> Auth
+    API --> Health
+    API --> Docs
+    
+    %% Application concerns
+    subgraph AppConcerns["Application Layer Concerns"]
+        direction TB
+        UC[Use Cases/Services]
+        DTO[DTOs]
+        Ports[Ports/Interfaces]
+        class UC,DTO,Ports application;
+    end
+    
+    APP --> UC
+    APP --> DTO
+    APP --> Ports
+    
+    %% Domain concerns
+    subgraph DomainConcerns["Domain Layer Concerns"]
+        direction TB
+        Ent[Entities & Value Objects]
+        DomS[Domain Services]
+        Ev[Domain Events]
+        Rules[Business Rules]
+        class Ent,DomS,Ev,Ruls domain;
+    end
+    
+    DOM --> Ent
+    DOM --> DomS
+    DOM --> Ev
+    DOM --> Rules
+    
+    %% Infrastructure concerns
+    subgraph InfraConcerns["Infrastructure Layer Concerns"]
+        direction TB
+        Repos[Repositories]
+        EF[EF Core Context]
+        ExtSvc[External Services]
+        MsgQ[Message Queues]
+        BGJobs[Background Jobs]
+        Storage[Storage Impl]
+        AIProv[AI Provider Impl]
+        class Repos,EF,ExtSvc,MsgQ,BGJobs,Storage,AIProv infrastructure;
+    end
+    
+    INFRA --> Repos
+    INFRA --> EF
+    INFRA --> ExtSvc
+    INFRA --> MsgQ
+    INFRA --> BGJobs
+    INFRA --> Storage
+    INFRA --> AIProv
+    
+    %% Legend
+    subgraph Legend["Legend"]
+        direction TB
+        ApiL[API Layer]:::api
+        AppL[Application Layer]:::application
+        DomL[Domain Layer]:::domain
+        InfL[Infrastructure Layer]:::infrastructure
+        LegalD[Legal Dependency]:::legal
+        IllegalD[Illegal Dependency]:::illegal
+    end
