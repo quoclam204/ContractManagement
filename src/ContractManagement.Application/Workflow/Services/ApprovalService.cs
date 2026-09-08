@@ -85,15 +85,7 @@ public class ApprovalService : IApprovalService
         var defaultApproverId = request.ApproverId ?? Guid.Empty;
         if (defaultApproverId == Guid.Empty)
         {
-            try
-            {
-                var anyUser = await _context.Database.SqlQueryRaw<Guid>("SELECT TOP 1 Id FROM dbo.USERS").FirstOrDefaultAsync();
-                defaultApproverId = anyUser != Guid.Empty ? anyUser : Guid.NewGuid();
-            }
-            catch
-            {
-                defaultApproverId = Guid.NewGuid();
-            }
+            defaultApproverId = await _context.GetDefaultApproverIdAsync();
         }
 
         // 5. Khởi tạo danh sách APPROVAL_STEPS snapshot theo WorkflowDefinition
