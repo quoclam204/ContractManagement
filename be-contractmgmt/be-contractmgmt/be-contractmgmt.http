@@ -1,6 +1,0 @@
-@be_contractmgmt_HostAddress = http://localhost:5296
-
-GET {{be_contractmgmt_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

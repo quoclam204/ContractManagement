@@ -1,0 +1,27 @@
+# Build & Packages
+bin/
+obj/
+node_modules/
+dist/
+build/
+.vs/
+.vscode/
+
+# Package caches
+*.user
+*.suo
+project.assets.json
+*.nuget.cache
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Documents & Binaries
+*.docx
+*.pdf
+*.zip

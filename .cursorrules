@@ -1,0 +1,10 @@
+# Cursor Rules - Contract Management System (CLM)
+
+- Project: Enterprise Contract Lifecycle Management (CLM)
+- Language: C# (.NET 9) for Backend, TypeScript/React for Frontend.
+- Architecture: Strict Clean Architecture (Domain -> Application -> Infrastructure -> WebApi).
+- All API Controllers must return standard responses: ApiResponse<T>.
+- Never introduce dependencies from Domain to outer layers.
+- Always use async/await with CancellationToken.
+- Git commit messages must strictly adhere to Conventional Commits: `<type>(<scope>): <message in English>`.
+- Always check CLAUDE.md for full engineering guidelines before generating major code components.

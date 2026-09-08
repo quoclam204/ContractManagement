@@ -1,24 +1,42 @@
-# Visual Studio
+# Visual Studio / Rider
 .vs/
 **/.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
 
-# .NET build
+# .NET Build artifacts
 bin/
 obj/
 **/bin/
 **/obj/
+*.dll
+*.exe
+*.pdb
 
-# User-specific files
-*.user
-*.suo
-
-# Node
+# Node / Frontend
 node_modules/
 dist/
+**/node_modules/
+**/dist/
+.eslintcache
 
-# Environment files
+# Environment files & Secrets
 .env
 .env.*
+!.env.example
+appsettings*.Development.json
+
+# Logs & Temp
+*.log
+logs/
+temp/
+scratch/
 
 # Local development plans (Private - not pushed to Git)
-local-plans/
+local-plans/
+
+# OS generated
+.DS_Store
+Thumbs.db
