@@ -1,39 +1,45 @@
 # Inspect Command
 
 ## Purpose
-Inspect repository architecture and report findings without changing files.
+Perform initial inspection of the repository and .claude directory to understand existing structure and configuration before starting work.
 
 ## Usage
-Use this command to understand the current state before making changes.
+Use this command at the very beginning of any work session to familiarize yourself with the current state of the repository and Claude Code configuration.
 
 ## What It Does
-1. Checks solution/project structure
-2. Reviews existing Contract module implementation (if any)
-3. Examines Workflow module as reference implementation
-4. Inspects database.sql for Contract-related tables
-5. Verifies EF Core configurations match schema
-6. Checks layer dependencies and module boundaries
-7. Reviews existing tests and testing patterns
-8. Examines coding conventions and patterns
-9. Reports findings without modifying any files
+1. Lists the .claude directory structure showing all available agents, commands, memory, playbooks, rules, skills, settings, and scripts
+2. Checks for the existence of key files and directories
+3. Shows the current git branch and recent commit history
+4. Displays the solution structure and key project files
+5. Reviews the database.sql file for Contract-related tables (if working on Contract module)
+6. Examines the Workflow module as reference implementation (if working on Contract module)
+7. Shows current Claude Code settings and permissions
+8. Provides recommendations for next steps based on findings
 
 ## Output
-Provides a structured report including:
-- Current architecture overview
-- Existing Contract module status (files present/missing)
-- Database schema inspection results
-- Layer dependency verification
-- Module boundary analysis
-- Testing coverage assessment
-- Coding convention compliance
-- Recommendations for next steps
+Provides:
+- .claude directory structure and file inventory
+- Current git status and branch information
+- Solution overview and project structure
+- Database schema inspection (Contract tables if applicable)
+- Workflow module reference overview (if applicable)
+- Current Claude Code configuration summary
+- Recommended next steps and available commands
 
 ## Example
-When starting work on a Contract feature, run this command first to:
-- See what Contract-related files already exist
-- Understand the database schema for Contracts
-- Review how the Workflow module is implemented
-- Check for any existing architecture violations
-- Learn the established patterns to follow
+Before starting any work:
+1. Run this inspect command
+2. Review the output showing:
+   - What .claude files are available
+   - Current git branch and recent commits
+   - Solution structure
+   - Database schema (for Contract work)
+   - Workflow module structure (for Contract work)
+   - Current settings and permissions
+3. Based on findings, decide on next appropriate command:
+   - For Contract module work: run `/contract` command
+   - For general work: consider `/implement-feature` or `/review` as appropriate
+   - For bug fixing: consider `/bug-fix` command
+   - For preparing PR: consider `/pull-request` command
 
-This ensures you begin work with full context and avoid duplicating effort or violating architectural principles.
+This ensures you begin work with complete context of both the repository and available Claude Code capabilities.
