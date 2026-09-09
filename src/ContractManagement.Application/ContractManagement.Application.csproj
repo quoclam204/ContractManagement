@@ -10,4 +10,9 @@
     <ProjectReference Include="..\ContractManagement.Domain\ContractManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+  </ItemGroup>
+
 </Project>
