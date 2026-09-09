@@ -1,10 +1,12 @@
+using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
+using ContractManagement.Domain;
 using ContractManagement.Domain.Workflow.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContractManagement.Infrastructure.Persistence;
 
-public class ContractManagementDbContext : DbContext, IWorkflowDbContext
+public class ContractManagementDbContext : DbContext, IWorkflowDbContext, IPartnerDbContext
 {
     public ContractManagementDbContext(DbContextOptions<ContractManagementDbContext> options)
         : base(options)
@@ -14,6 +16,7 @@ public class ContractManagementDbContext : DbContext, IWorkflowDbContext
     public DbSet<WorkflowDefinition> WorkflowDefinitions => Set<WorkflowDefinition>();
     public DbSet<WorkflowStep> WorkflowSteps => Set<WorkflowStep>();
     public DbSet<ApprovalStep> ApprovalSteps => Set<ApprovalStep>();
+    public DbSet<Partner> Partners => Set<Partner>();
 
     public async Task<Guid> GetDefaultApproverIdAsync(CancellationToken cancellationToken = default)
     {
