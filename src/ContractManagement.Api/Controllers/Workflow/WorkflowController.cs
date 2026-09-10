@@ -1,5 +1,6 @@
 using ContractManagement.Application.Workflow.DTOs;
 using ContractManagement.Application.Workflow.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace ContractManagement.Api.Controllers.Workflow;
 [ApiController]
 [Route("api/workflows")]
 [Tags("Workflow Configuration (Người 4)")]
+[Authorize(Policy = "RequireManager")]
 public class WorkflowController : ControllerBase
 {
     private readonly IWorkflowService _workflowService;

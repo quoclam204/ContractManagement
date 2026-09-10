@@ -1,9 +1,18 @@
+using System.Text;
+using ContractManagement.Api.Services;
+using ContractManagement.Application.Common.Interfaces;
+using ContractManagement.Application.Identity.Interfaces;
+using ContractManagement.Application.Identity.Services;
 using ContractManagement.Application;
 using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Application.Workflow.Services;
+using ContractManagement.Domain.Identity.Enums;
 using ContractManagement.Infrastructure.Persistence;
+using ContractManagement.Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
+builder.Services.AddHttpContextAccessor();
 
 // Database Context
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -22,16 +32,62 @@ builder.Services.AddDbContext<ContractManagementDbContext>(options =>
     }
 });
 
+// DbContext Interfaces
 builder.Services.AddScoped<IWorkflowDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
+builder.Services.AddScoped<IIdentityDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 builder.Services.AddScoped<IPartnerDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 
 // Application Services (MediatR, FluentValidation, ValidationBehavior)
 builder.Services.AddApplicationServices();
 
-// Workflow Module Services
+// Security & CurrentUser
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Identity & Department Services (Người 1 - Lead)
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Workflow Module Services (Reference Implementation)
 builder.Services.AddScoped<IWorkflowConditionEvaluator, WorkflowConditionEvaluator>();
 builder.Services.AddScoped<IWorkflowService, WorkflowService>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
+
+// JWT Authentication Configuration
+var jwtSecret = builder.Configuration["Jwt:SecretKey"] ?? "ContractManagementSuperSecretKey2026!@#$%^&*()_+";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ContractManagement";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ContractManagementApp";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+// RBAC Authorization Policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdmin", policy => policy.RequireRole(UserRole.Admin.ToString()));
+    options.AddPolicy("RequireManager", policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Manager.ToString()));
+    options.AddPolicy("RequireApprover", policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Approver.ToString()));
+});
 
 var app = builder.Build();
 
@@ -41,6 +97,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 
