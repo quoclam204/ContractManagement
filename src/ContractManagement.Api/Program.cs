@@ -1,6 +1,7 @@
 using ContractManagement.Application.Notification.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Application.Workflow.Services;
+using ContractManagement.Infrastructure.Messaging;
 using ContractManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,11 @@ builder.Services.AddDbContext<ContractManagementDbContext>(options =>
 });
 
 builder.Services.AddScoped<IWorkflowDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
+// Notification Module Services
 builder.Services.AddScoped<INotificationDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
+
+// RabbitMQ Messaging
+builder.Services.AddRabbitMqMessaging(builder.Configuration);
 
 // MediatR
 builder.Services.AddMediatR(cfg =>
