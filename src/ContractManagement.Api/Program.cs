@@ -4,6 +4,7 @@ using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Application.Workflow.Services;
 using ContractManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Contract Management API v1");
+        options.RoutePrefix = "swagger";
+    });
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
@@ -45,5 +52,10 @@ app.UseHttpsRedirection();
 app.MapHealthChecks("/health");
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/", () => Results.Redirect("/swagger"));
+}
 
 app.Run();

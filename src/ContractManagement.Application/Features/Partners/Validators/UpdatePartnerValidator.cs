@@ -3,10 +3,13 @@ using ContractManagement.Application.Features.Partners;
 
 namespace ContractManagement.Application.Features.Partners.Validators;
 
-public class CreatePartnerValidator : AbstractValidator<CreatePartnerCommand>
+public class UpdatePartnerValidator : AbstractValidator<UpdatePartnerCommand>
 {
-    public CreatePartnerValidator()
+    public UpdatePartnerValidator()
     {
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("Id đối tác là bắt buộc.");
+
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Tên đối tác là bắt buộc.")
             .MaximumLength(300).WithMessage("Tên đối tác không được vượt quá 300 ký tự.");
@@ -28,9 +31,9 @@ public class CreatePartnerValidator : AbstractValidator<CreatePartnerCommand>
     }
 }
 
-public class CreatePartnerRequestValidator : AbstractValidator<CreatePartnerRequest>
+public class UpdatePartnerRequestValidator : AbstractValidator<UpdatePartnerRequest>
 {
-    public CreatePartnerRequestValidator()
+    public UpdatePartnerRequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Tên đối tác là bắt buộc.")

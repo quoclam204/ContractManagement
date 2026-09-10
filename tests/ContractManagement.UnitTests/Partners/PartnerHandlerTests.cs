@@ -93,4 +93,97 @@ public class PartnerHandlerTests
         await act.Should().ThrowAsync<ValidationException>()
             .Where(ex => ex.Errors.Count() >= 3);
     }
+
+    [Fact]
+    public async Task GetPartnersQueryHandler_WhenSearchTermMatchesName_ShouldReturnMatchingPartners()
+    {
+        // Arrange
+        using var context = CreateInMemoryDbContext();
+        var now = DateTime.UtcNow;
+
+        context.Partners.AddRange(
+            new Domain.Partner(Guid.NewGuid(), "Công ty Cổ phần Phần mềm FPT", "0101234567", "Nguyễn Văn A", "contact@fpt.com", "Hà Nội", now.AddMinutes(-10)),
+            new Domain.Partner(Guid.NewGuid(), "Tập đoàn Viettel", "0109876543", "Trần Văn B", "contact@viettel.vn", "Hà Nội", now.AddMinutes(-5)),
+            new Domain.Partner(Guid.NewGuid(), "Công ty TNHH Dịch vụ FPT", "0101234567-001", "Lê Văn C", "service@fpt.com", "TP HCM", now)
+        );
+        await context.SaveChangesAsync();
+
+        var handler = new GetPartnersQueryHandler(context);
+        var query = new GetPartnersQuery { SearchTerm = "fpt" };
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.TotalCount.Should().Be(2);
+        result.Items.Should().HaveCount(2);
+        result.Items.Should().OnlyContain(p => p.Name.Contains("FPT", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task GetPartnersQueryHandler_WhenSearchTermMatchesTaxCode_ShouldReturnMatchingPartners()
+    {
+        // Arrange
+        using var context = CreateInMemoryDbContext();
+        var now = DateTime.UtcNow;
+
+        context.Partners.AddRange(
+            new Domain.Partner(Guid.NewGuid(), "Công ty ABC", "0101234567", "Nguyễn Văn A", "abc@gmail.com", "Hà Nội", now.AddMinutes(-10)),
+            new Domain.Partner(Guid.NewGuid(), "Công ty XYZ", "0109876543", "Trần Văn B", "xyz@gmail.com", "Hà Nội", now.AddMinutes(-5)),
+            new Domain.Partner(Guid.NewGuid(), "Chi nhánh XYZ", "0109876543-001", "Lê Văn C", "xyz-branch@gmail.com", "Đà Nẵng", now)
+        );
+        await context.SaveChangesAsync();
+
+        var handler = new GetPartnersQueryHandler(context);
+        var query = new GetPartnersQuery { SearchTerm = "0109876543" };
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.TotalCount.Should().Be(2);
+        result.Items.Should().HaveCount(2);
+        result.Items.Should().OnlyContain(p => p.TaxCode != null && p.TaxCode.Contains("0109876543"));
+    }
+
+    [Fact]
+    public async Task GetPartnersQueryHandler_WithPagination_ShouldReturnCorrectPageAndTotalCount()
+    {
+        // Arrange
+        using var context = CreateInMemoryDbContext();
+        var now = DateTime.UtcNow;
+
+        for (int i = 1; i <= 5; i++)
+        {
+            context.Partners.Add(new Domain.Partner(
+                Guid.NewGuid(),
+                $"Đối tác thứ {i}",
+                $"010000000{i}",
+                $"Đại diện {i}",
+                $"partner{i}@test.com",
+                $"Địa chỉ {i}",
+                now.AddMinutes(-i)
+            ));
+        }
+        await context.SaveChangesAsync();
+
+        var handler = new GetPartnersQueryHandler(context);
+        var query = new GetPartnersQuery { PageNumber = 2, PageSize = 2 };
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.TotalCount.Should().Be(5);
+        result.PageNumber.Should().Be(2);
+        result.PageSize.Should().Be(2);
+        result.TotalPages.Should().Be(3);
+        result.Items.Should().HaveCount(2);
+        result.HasPreviousPage.Should().BeTrue();
+        result.HasNextPage.Should().BeTrue();
+    }
 }
+
