@@ -3,7 +3,7 @@ using MediatR;
 
 namespace ContractManagement.Application.Features.Partners
 {
-    public class UpdatePartnerCommand : IRequest<PartnerDto>
+    public class UpdatePartnerCommand : IRequest<PartnerDto?>
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = default!;

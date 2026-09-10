@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContractManagement.Application.Features.Partners
 {
-    public class UpdatePartnerCommandHandler : IRequestHandler<UpdatePartnerCommand, PartnerDto>
+    public class UpdatePartnerCommandHandler : IRequestHandler<UpdatePartnerCommand, PartnerDto?>
     {
         private readonly IPartnerDbContext _context;
 
@@ -15,7 +15,7 @@ namespace ContractManagement.Application.Features.Partners
             _context = context;
         }
 
-        public async Task<PartnerDto> Handle(UpdatePartnerCommand request, CancellationToken cancellationToken)
+        public async Task<PartnerDto?> Handle(UpdatePartnerCommand request, CancellationToken cancellationToken)
         {
             var partner = await _context.Partners
                 .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
