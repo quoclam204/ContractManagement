@@ -176,4 +176,32 @@ public class WorkflowController : ControllerBase
         var result = _workflowService.EvaluateCondition(request.Expression, request.ContractValue);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Thêm một bước vào một luồng duyệt đã tồn tại
+    /// </summary>
+    [HttpPost("{workflowId:guid}/steps")]
+    [ProducesResponseType(typeof(WorkflowStepDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddStep(Guid workflowId, [FromBody] CreateWorkflowStepRequest request)
+    {
+        try
+        {
+            var result = await _workflowService.AddStepAsync(workflowId, request);
+            return CreatedAtAction(nameof(GetWorkflowById), new { id = result.Id }, result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }
