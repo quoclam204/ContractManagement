@@ -31,6 +31,9 @@ public static class MessagingServiceCollectionExtensions
         // Publisher — singleton, creates transient channels per publish
         services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 
+        // NotificationConsumer — hosted service consuming RabbitMQ messages
+        services.AddHostedService<NotificationConsumer>();
+
         return services;
     }
 }
