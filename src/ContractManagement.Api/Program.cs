@@ -3,6 +3,8 @@ using ContractManagement.Api.Services;
 using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Application.Identity.Interfaces;
 using ContractManagement.Application.Identity.Services;
+using ContractManagement.Application;
+using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Application.Workflow.Services;
 using ContractManagement.Domain.Identity.Enums;
@@ -33,12 +35,10 @@ builder.Services.AddDbContext<ContractManagementDbContext>(options =>
 // DbContext Interfaces
 builder.Services.AddScoped<IWorkflowDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 builder.Services.AddScoped<IIdentityDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
+builder.Services.AddScoped<IPartnerDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 
-// MediatR
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssembly(typeof(WorkflowService).Assembly);
-});
+// Application Services (MediatR, FluentValidation, ValidationBehavior)
+builder.Services.AddApplicationServices();
 
 // Security & CurrentUser
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
