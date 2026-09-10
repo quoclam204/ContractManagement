@@ -1,4 +1,5 @@
 using ContractManagement.Application.Notification.Interfaces;
+using ContractManagement.Application.Notification.Services;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Application.Workflow.Services;
 using ContractManagement.Infrastructure.Messaging;
@@ -25,6 +26,7 @@ builder.Services.AddDbContext<ContractManagementDbContext>(options =>
 builder.Services.AddScoped<IWorkflowDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 // Notification Module Services
 builder.Services.AddScoped<INotificationDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // RabbitMQ Messaging
 builder.Services.AddRabbitMqMessaging(builder.Configuration);

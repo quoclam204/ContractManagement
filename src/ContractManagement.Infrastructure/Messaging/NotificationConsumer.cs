@@ -72,12 +72,12 @@ public sealed class NotificationConsumer : BackgroundService
             exchange: ExchangeName,
             routingKey: RoutingKey);
 
-        // Use EventingBasicConsumer (synchronous dispatch, RabbitMQ.Client 6.x).
-        var consumer = new EventingBasicConsumer(_channel);
+        // Use AsyncEventingBasicConsumer because factory.DispatchConsumersAsync = true
+        var consumer = new AsyncEventingBasicConsumer(_channel);
 
-        consumer.Received += (sender, ea) =>
+        consumer.Received += async (model, ea) =>
         {
-            HandleMessage(ea);
+            await HandleMessageAsync(ea);
         };
 
         _channel.BasicConsume(
@@ -90,7 +90,7 @@ public sealed class NotificationConsumer : BackgroundService
         return Task.CompletedTask;
     }
 
-    private void HandleMessage(BasicDeliverEventArgs ea)
+    private async Task HandleMessageAsync(BasicDeliverEventArgs ea)
     {
         var json = Encoding.UTF8.GetString(ea.Body.ToArray());
 
@@ -121,12 +121,12 @@ public sealed class NotificationConsumer : BackgroundService
             using var scope = _scopeFactory.CreateScope();
             var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
-            notificationService.CreateAsync(new CreateNotificationRequest
+            await notificationService.CreateAsync(new CreateNotificationRequest
             {
                 UserId = evt.UserId,
                 Type = NotificationType.SystemAnnouncement,
                 ContractId = null
-            }).GetAwaiter().GetResult();
+            });
 
             _logger.LogInformation("Created welcome notification for UserId {UserId}", evt.UserId);
 
