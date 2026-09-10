@@ -69,10 +69,10 @@ public class NotificationService : INotificationService
             .CountAsync();
     }
 
-    public async Task<int> MarkAsReadAsync(List<Guid> notificationIds)
+    public async Task<int> MarkAsReadAsync(Guid userId, List<Guid> notificationIds)
     {
         var notifications = await _context.Notifications
-            .Where(n => notificationIds.Contains(n.Id))
+            .Where(n => n.UserId == userId && notificationIds.Contains(n.Id))
             .ToListAsync();
 
         foreach (var notification in notifications)

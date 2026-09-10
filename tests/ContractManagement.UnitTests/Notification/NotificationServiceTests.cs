@@ -148,22 +148,65 @@ public class NotificationServiceTests : IDisposable
     public async Task MarkAsReadAsync_MarksSpecifiedNotificationsAsRead()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var notificationId1 = Guid.NewGuid();
         var notificationId2 = Guid.NewGuid();
         var notificationId3 = Guid.NewGuid();
-        _context.Notifications.Add(new DomainNotification.Notification { Id = notificationId1, UserId = Guid.NewGuid(), Type = NotificationType.ApprovalRequest, IsRead = false, CreatedAt = DateTime.UtcNow });
-        _context.Notifications.Add(new DomainNotification.Notification { Id = notificationId2, UserId = Guid.NewGuid(), Type = NotificationType.SignRequest, IsRead = false, CreatedAt = DateTime.UtcNow });
-        _context.Notifications.Add(new DomainNotification.Notification { Id = notificationId3, UserId = Guid.NewGuid(), Type = NotificationType.ExpiringSoon, IsRead = false, CreatedAt = DateTime.UtcNow });
+        _context.Notifications.Add(new DomainNotification.Notification { Id = notificationId1, UserId = userId, Type = NotificationType.ApprovalRequest, IsRead = false, CreatedAt = DateTime.UtcNow });
+        _context.Notifications.Add(new DomainNotification.Notification { Id = notificationId2, UserId = userId, Type = NotificationType.SignRequest, IsRead = false, CreatedAt = DateTime.UtcNow });
+        _context.Notifications.Add(new DomainNotification.Notification { Id = notificationId3, UserId = userId, Type = NotificationType.ExpiringSoon, IsRead = false, CreatedAt = DateTime.UtcNow });
         await _context.SaveChangesAsync();
 
         // Act
-        var affected = await _service.MarkAsReadAsync(new List<Guid> { notificationId1, notificationId2 });
+        var affected = await _service.MarkAsReadAsync(userId, new List<Guid> { notificationId1, notificationId2 });
 
         // Assert
         Assert.Equal(2, affected);
         Assert.True(_context.Notifications.First(n => n.Id == notificationId1).IsRead);
         Assert.True(_context.Notifications.First(n => n.Id == notificationId2).IsRead);
         Assert.False(_context.Notifications.First(n => n.Id == notificationId3).IsRead);
+    }
+
+    [Fact]
+    public async Task MarkAsReadAsync_WithOtherUserNotifications_OnlyUpdatesOwnNotifications()
+    {
+        // Arrange
+        var userA = Guid.NewGuid();
+        var userB = Guid.NewGuid();
+
+        var userANotification = Guid.NewGuid();
+        var userBNotification = Guid.NewGuid();
+
+        _context.Notifications.Add(new DomainNotification.Notification { Id = userANotification, UserId = userA, Type = NotificationType.ApprovalRequest, IsRead = false, CreatedAt = DateTime.UtcNow });
+        _context.Notifications.Add(new DomainNotification.Notification { Id = userBNotification, UserId = userB, Type = NotificationType.SignRequest, IsRead = false, CreatedAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        // Act: User A tries to mark both their own and User B's notification as read
+        var affected = await _service.MarkAsReadAsync(userA, new List<Guid> { userANotification, userBNotification });
+
+        // Assert: Only User A's notification should be updated
+        Assert.Equal(1, affected);
+        Assert.True(_context.Notifications.First(n => n.Id == userANotification).IsRead);
+        Assert.False(_context.Notifications.First(n => n.Id == userBNotification).IsRead);
+    }
+
+    [Fact]
+    public async Task MarkAsReadAsync_OtherUserNotification_ExcludedFromUpdate()
+    {
+        // Arrange
+        var userA = Guid.NewGuid();
+        var userB = Guid.NewGuid();
+
+        var userBNotification = Guid.NewGuid();
+        _context.Notifications.Add(new DomainNotification.Notification { Id = userBNotification, UserId = userB, Type = NotificationType.ApprovalRequest, IsRead = false, CreatedAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        // Act: User A tries to mark User B's notification as read
+        var affected = await _service.MarkAsReadAsync(userA, new List<Guid> { userBNotification });
+
+        // Assert: No notifications updated (User B's notification remains unread)
+        Assert.Equal(0, affected);
+        Assert.False(_context.Notifications.First(n => n.Id == userBNotification).IsRead);
     }
 
     [Fact]

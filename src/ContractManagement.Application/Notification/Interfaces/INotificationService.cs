@@ -28,9 +28,9 @@ public interface INotificationService
     Task<int> GetUnreadCountAsync(Guid userId);
 
     /// <summary>
-    /// Marks specific notifications as read
+    /// Marks specific notifications as read for a user
     /// </summary>
-    Task<int> MarkAsReadAsync(List<Guid> notificationIds);
+    Task<int> MarkAsReadAsync(Guid userId, List<Guid> notificationIds);
 
     /// <summary>
     /// Marks all notifications as read for a user

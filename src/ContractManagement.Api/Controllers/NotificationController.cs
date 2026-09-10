@@ -91,9 +91,7 @@ public class NotificationController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { error = "User identity not found. Provide X-User-Id header." });
 
-        // Note: The service method doesn't validate ownership - this should be addressed in application layer if needed
-        // For now, we trust the client to only send their own notification IDs
-        var affected = await _notificationService.MarkAsReadAsync(request.NotificationIds);
+        var affected = await _notificationService.MarkAsReadAsync(userId, request.NotificationIds);
         return Ok(affected);
     }
 
