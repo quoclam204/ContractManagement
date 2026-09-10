@@ -1,5 +1,6 @@
 using ContractManagement.Application.Identity.DTOs;
 using ContractManagement.Application.Identity.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace ContractManagement.Api.Controllers.Identity;
 [ApiController]
 [Route("api/departments")]
 [Tags("Department Management (Người 1 - Lead)")]
+[Authorize(Policy = "RequireManager")]
 public class DepartmentsController : ControllerBase
 {
     private readonly IDepartmentService _departmentService;

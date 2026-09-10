@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ContractManagement.Api.Controllers.Identity;
 
 /// <summary>
-/// Controller quản lý danh sách người dùng (Chỉ Admin có quyền xem đầy đủ)
+/// Controller quản lý danh sách người dùng
 /// </summary>
 [ApiController]
 [Route("api/users")]
@@ -22,10 +22,10 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách toàn bộ người dùng trong hệ thống (Yêu cầu quyền Admin/Manager)
+    /// Lấy danh sách toàn bộ người dùng trong hệ thống (Yêu cầu quyền Manager trở lên)
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Policy = "RequireManager")]
     [ProducesResponseType(typeof(IEnumerable<UserDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
@@ -37,7 +37,7 @@ public class UsersController : ControllerBase
     /// Lấy chi tiết thông tin người dùng theo ID
     /// </summary>
     [HttpGet("{id:guid}")]
-    [Authorize]
+    [Authorize(Policy = "RequireManager")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)

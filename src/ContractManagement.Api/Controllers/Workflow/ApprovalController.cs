@@ -1,5 +1,6 @@
 using ContractManagement.Application.Workflow.DTOs;
 using ContractManagement.Application.Workflow.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace ContractManagement.Api.Controllers.Workflow;
 [ApiController]
 [Route("api/approvals")]
 [Tags("Approval Process (Người 4)")]
+[Authorize(Policy = "RequireApprover")]
 public class ApprovalController : ControllerBase
 {
     private readonly IApprovalService _approvalService;
