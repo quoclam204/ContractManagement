@@ -17,12 +17,11 @@ public class PartnersController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả các đối tác
+    /// Lấy danh sách đối tác có phân trang và tìm kiếm
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetPartners()
+    public async Task<IActionResult> GetPartners([FromQuery] GetPartnersQuery query)
     {
-        var query = new GetPartnersQuery();
         var result = await _mediator.Send(query);
         return Ok(result);
     }
