@@ -2,7 +2,6 @@ using ContractManagement.Application.Contract.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Domain.Contract.Entities;
 using ContractManagement.Application.Identity.Interfaces;
-using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Domain.Identity.Entities;
 using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Domain;
@@ -11,8 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContractManagement.Infrastructure.Persistence;
 
-public class ContractManagementDbContext : DbContext, IContractManagementDbContext
-public class ContractManagementDbContext : DbContext, IWorkflowDbContext, IIdentityDbContext, IPartnerDbContext
+public class ContractManagementDbContext : DbContext, IContractManagementDbContext, IWorkflowDbContext, IIdentityDbContext, IPartnerDbContext
 {
     public ContractManagementDbContext(DbContextOptions<ContractManagementDbContext> options)
         : base(options)
