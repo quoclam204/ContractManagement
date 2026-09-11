@@ -1,6 +1,8 @@
 using System.Text;
 using ContractManagement.Api.Services;
 using ContractManagement.Application;
+using ContractManagement.Application.AI.Interfaces;
+using ContractManagement.Application.AI.Services;
 using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Application.Contract.Interfaces;
 using ContractManagement.Application.Contract.Services;
@@ -14,6 +16,7 @@ using ContractManagement.Domain.Identity.Enums;
 using ContractManagement.Infrastructure.Messaging;
 using ContractManagement.Infrastructure.Persistence;
 using ContractManagement.Infrastructure.Security;
+using ContractManagement.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -49,6 +52,10 @@ builder.Services.AddScoped<IContractManagementDbContext>(sp => sp.GetRequiredSer
 builder.Services.AddScoped<IIdentityDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 builder.Services.AddScoped<IPartnerDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 
+// Storage Services
+var storagePath = builder.Configuration["Storage:LocalPath"] ?? "./storage";
+builder.Services.AddScoped<IStorageProvider>(_ => new LocalStorageProvider(storagePath));
+
 // Application Services (MediatR, FluentValidation, ValidationBehavior)
 builder.Services.AddApplicationServices();
 
@@ -64,6 +71,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Contract Module Services
 builder.Services.AddScoped<IContractTypeService, ContractTypeService>();
 builder.Services.AddScoped<IContractTemplateVersionService, ContractTemplateVersionService>();
+
+// AI Module Services
+builder.Services.AddScoped<IAIContractAssistantService, MockAIContractAssistantService>();
 
 // Workflow Module Services (Reference Implementation)
 builder.Services.AddScoped<IWorkflowConditionEvaluator, WorkflowConditionEvaluator>();
