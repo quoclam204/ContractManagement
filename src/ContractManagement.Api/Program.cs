@@ -1,6 +1,8 @@
 using System.Text;
 using ContractManagement.Api.Services;
 using ContractManagement.Application;
+using ContractManagement.Application.AI.Interfaces;
+using ContractManagement.Application.AI.Services;
 using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Application.Contract.Interfaces;
 using ContractManagement.Application.Contract.Services;
@@ -64,6 +66,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Contract Module Services
 builder.Services.AddScoped<IContractTypeService, ContractTypeService>();
 builder.Services.AddScoped<IContractTemplateVersionService, ContractTemplateVersionService>();
+
+// AI Module Services
+builder.Services.AddScoped<IAIContractAssistantService, MockAIContractAssistantService>();
 
 // Workflow Module Services (Reference Implementation)
 builder.Services.AddScoped<IWorkflowConditionEvaluator, WorkflowConditionEvaluator>();
