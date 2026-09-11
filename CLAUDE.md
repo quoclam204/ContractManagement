@@ -219,23 +219,81 @@ The **Workflow module is the PERMANENT reference implementation** for Contract m
 
 ## 📝 Coding Standards
 
-### Conventional Commits
-Use prefixes for commit messages:
-- `feat(` - new feature
-- `fix(` - bug fix
-- `docs(` - documentation changes
-- `style(` - formatting, missing semicolons, etc.
-- `refactor(` - code refactoring
-- `perf(` - performance improvements
-- `test(` - adding or correcting tests
-- `chore(` - build process, tooling changes
+## 📌 Git Commit Convention
 
-Examples:
-- `feat(contract): add contract entity`
-- `fix(contract): resolve contract status transition bug`
-- `docs(contract): update contract lifecycle documentation`
-- `refactor(contract): simplify contract validation logic`
-- `test(contract): add unit tests for contract approval`
+This project strictly adheres to the **Conventional Commits** specification for all commit messages across both the **.NET API backend** and **React frontend**.
+
+### 1. Commit Message Format
+The standard commit message format is:
+```text
+<type>: <description>
+```
+Or optionally with an explicit scope:
+```text
+<type>(<scope>): <description>
+```
+
+#### Allowed Scopes (Optional):
+- **Backend (.NET)**: `contract`, `workflow`, `identity`, `partner`, `payment`, `storage`, `notification`, `ai`, `api`, `infrastructure`, `domain`, `db`
+- **Frontend (React)**: `auth`, `contract`, `workflow`, `dashboard`, `components`, `hooks`, `ui`
+
+### 2. Allowed Commit Types
+| Type | Purpose | When to Use |
+| :--- | :--- | :--- |
+| `feat` | Add a new feature | Introducing a new endpoint, entity, use case, or UI component. |
+| `fix` | Fix a bug | Patching a bug, error, broken validation, or logic defect. |
+| `refactor` | Restructure or improve code | Code refactoring that neither adds a feature nor fixes a bug. |
+| `docs` | Documentation changes | Updating SRS, markdown docs, API specs, diagrams, or comments. |
+| `test` | Add or modify tests | Adding or updating unit tests, integration tests, or test fixtures. |
+| `chore` | Configuration & maintenance | Updating packages, build scripts, Docker setup, or repo maintenance. |
+| `style` | Code formatting & style | Formatting, linting, whitespace, or naming without logic changes. |
+
+### 3. Commit Message Rules & Quality Standards
+- **Imperative Mood**: Write in the imperative mood (e.g., `add`, `implement`, `fix`, `refactor` — NOT `added`, `fixing`, `fixes`).
+- **Language**: All commit messages must be written in **English**.
+- **Short & Concise**: Keep the subject line short, clear, and meaningful (aim for ≤ 72 characters).
+- **Descriptive**: Accurately describe what changed and why in the codebase.
+- **Lowercase**: Use lowercase for type and starting character of description (e.g., `feat: implement ...`).
+
+### 4. 🚫 Strictly Forbidden Vague Messages
+Do NOT write vague, lazy, or ambiguous commit messages, such as:
+- ❌ `update code`
+- ❌ `fix`
+- ❌ `changes`
+- ❌ `done`
+- ❌ `update`
+- ❌ `final`
+- ❌ `modified files`
+- ❌ `fix bug`
+- ❌ `test`
+
+### 5. 🤖 Rules for AI Assistants
+- Whenever an AI assistant creates, suggests, or executes a Git commit, it **MUST** read and strictly follow the Git Commit Convention defined in this `CLAUDE.md`.
+- AI must inspect the staged changes (`git diff --staged`) to formulate a precise `<type>: <description>` or `<type>(<scope>): <description>`.
+- AI must NEVER use or suggest any of the forbidden vague commit messages listed above.
+
+### 6. Practical Project Examples
+
+#### Backend (.NET API):
+- `feat(contract): implement contract draft creation use case`
+- `feat(workflow): add multi-step approval routing engine`
+- `feat(storage): implement MinIO storage provider for attachments`
+- `fix(workflow): resolve null reference exception in condition evaluator`
+- `fix(auth): correct token expiration calculation in JWT handler`
+- `refactor(persistence): modularize entity configurations per bounded context`
+- `refactor(api): clean up Program.cs with extension methods for layer DI`
+- `docs: update SRS v2 architecture and sequence diagrams`
+- `test(workflow): add unit tests for approval step transitions`
+- `chore: add Serilog and Seq structured logging configuration`
+- `style: format C# entity classes according to naming conventions`
+
+#### Frontend (React):
+- `feat(contract): add contract creation form with template selector`
+- `feat(dashboard): integrate Recharts for contract status analytics`
+- `fix(auth): handle refresh token race condition on 401 response`
+- `refactor(components): extract reusable Modal dialog with Shadcn UI`
+- `test(hooks): add unit tests for useContractApproval custom hook`
+- `chore: update TanStack Query to version 5.x`
 
 ### Code Style
 - Follow existing code style and conventions
