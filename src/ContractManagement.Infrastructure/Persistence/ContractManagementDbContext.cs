@@ -1,3 +1,6 @@
+using ContractManagement.Application.Contract.Interfaces;
+using ContractManagement.Application.Workflow.Interfaces;
+using ContractManagement.Domain.Contract.Entities;
 using ContractManagement.Application.Identity.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Domain.Identity.Entities;
@@ -8,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContractManagement.Infrastructure.Persistence;
 
+public class ContractManagementDbContext : DbContext, IContractManagementDbContext
 public class ContractManagementDbContext : DbContext, IWorkflowDbContext, IIdentityDbContext, IPartnerDbContext
 {
     public ContractManagementDbContext(DbContextOptions<ContractManagementDbContext> options)
@@ -18,6 +22,10 @@ public class ContractManagementDbContext : DbContext, IWorkflowDbContext, IIdent
     public DbSet<WorkflowDefinition> WorkflowDefinitions => Set<WorkflowDefinition>();
     public DbSet<WorkflowStep> WorkflowSteps => Set<WorkflowStep>();
     public DbSet<ApprovalStep> ApprovalSteps => Set<ApprovalStep>();
+    public DbSet<ContractType> ContractTypes => Set<ContractType>();
+    public DbSet<ContractTemplateVersion> ContractTemplateVersions => Set<ContractTemplateVersion>();
+    public DbSet<Contract> Contracts => Set<Contract>();
+    
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Partner> Partners => Set<Partner>();
@@ -30,12 +38,20 @@ public class ContractManagementDbContext : DbContext, IWorkflowDbContext, IIdent
             if (user != Guid.Empty)
                 return user;
         }
+        // Table USERS might not exist yet before migration
         catch
         {
-            // Table USERS might not exist yet before migration
+            // Return a new Guid if there's an error (table doesn't exist yet)
+            return Guid.NewGuid();
         }
-
+        
+        // Default return if no user found
         return Guid.NewGuid();
+    }
+    
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return base.SaveChangesAsync(cancellationToken);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

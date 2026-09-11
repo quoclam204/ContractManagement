@@ -1,3 +1,4 @@
+using ContractManagement.Application.Contract.Interfaces;
 using System.Text;
 using ContractManagement.Api.Services;
 using ContractManagement.Application.Common.Interfaces;
@@ -34,6 +35,7 @@ builder.Services.AddDbContext<ContractManagementDbContext>(options =>
 
 // DbContext Interfaces
 builder.Services.AddScoped<IWorkflowDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
+builder.Services.AddScoped<IContractManagementDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 builder.Services.AddScoped<IIdentityDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 builder.Services.AddScoped<IPartnerDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 
