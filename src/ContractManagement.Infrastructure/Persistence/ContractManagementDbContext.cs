@@ -1,3 +1,6 @@
+using ContractManagement.Application.Notification.Interfaces;
+using ContractManagement.Application.Workflow.Interfaces;
+using DomainNotification = ContractManagement.Domain.Notification.Entities;
 using ContractManagement.Application.Contract.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Domain.Contract.Entities;
@@ -10,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContractManagement.Infrastructure.Persistence;
 
+public class ContractManagementDbContext : DbContext, IWorkflowDbContext, INotificationDbContext
 public class ContractManagementDbContext : DbContext, IContractManagementDbContext, IWorkflowDbContext, IIdentityDbContext, IPartnerDbContext
 {
     public ContractManagementDbContext(DbContextOptions<ContractManagementDbContext> options)
@@ -27,6 +31,8 @@ public class ContractManagementDbContext : DbContext, IContractManagementDbConte
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Partner> Partners => Set<Partner>();
+
+    public DbSet<DomainNotification.Notification> Notifications => Set<DomainNotification.Notification>();
 
     public async Task<Guid> GetDefaultApproverIdAsync(CancellationToken cancellationToken = default)
     {
