@@ -11,7 +11,7 @@ namespace ContractManagement.Api.Controllers.Identity;
 /// </summary>
 [ApiController]
 [Route("api/users")]
-[Tags("User Management (Người 1 - Lead)")]
+[Tags("User Management")]
 public class UsersController : ControllerBase
 {
     private readonly IAuthService _authService;

@@ -6,6 +6,7 @@ namespace ContractManagement.Api.Controllers.Contract;
 
 [ApiController]
 [Route("api/[controller]")]
+[Tags("Contract Templates")]
 public class ContractTemplateVersionController : ControllerBase
 {
     private readonly IContractTemplateVersionService _contractTemplateVersionService;

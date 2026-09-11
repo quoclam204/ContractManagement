@@ -1,4 +1,4 @@
-﻿using ContractManagement.Domain.Contract.Entities;
+using ContractManagement.Domain.Contract.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -93,10 +93,6 @@ public class ContractConfiguration : IEntityTypeConfiguration<ContractManagement
             .HasForeignKey(x => x.TemplateVersionUsedId);
 
         // Quan hệ tự tham chiếu N-1 với Contracts (ParentContract)
-        builder.HasOne<ContractManagement.Domain.Contract.Entities.Contract>()
-            .WithMany()
-            .HasForeignKey("ParentContractId")
-            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete on self-reference
         builder.HasOne<ContractManagement.Domain.Contract.Entities.Contract>()
             .WithMany()
             .HasForeignKey("ParentContractId")

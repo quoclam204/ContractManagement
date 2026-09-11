@@ -6,6 +6,7 @@ namespace ContractManagement.Api.Controllers.Contract;
 
 [ApiController]
 [Route("api/[controller]")]
+[Tags("Contract Types")]
 public class ContractTypeController : ControllerBase
 {
     private readonly IContractTypeService _contractTypeService;

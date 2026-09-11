@@ -6,7 +6,7 @@ namespace ContractManagement.Api.Controllers.Partners;
 
 [ApiController]
 [Route("api/v1/partners")]
-[Tags("Partners (Người 3)")]
+[Tags("Partners")]
 public class PartnersController : ControllerBase
 {
     private readonly IMediator _mediator;

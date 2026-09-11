@@ -1,24 +1,23 @@
+using System.Text;
+using ContractManagement.Api.Services;
+using ContractManagement.Application;
+using ContractManagement.Application.Common.Interfaces;
+using ContractManagement.Application.Contract.Interfaces;
+using ContractManagement.Application.Contract.Services;
+using ContractManagement.Application.Identity.Interfaces;
+using ContractManagement.Application.Identity.Services;
 using ContractManagement.Application.Notification.Interfaces;
 using ContractManagement.Application.Notification.Services;
 using ContractManagement.Application.Workflow.Interfaces;
 using ContractManagement.Application.Workflow.Services;
-using ContractManagement.Infrastructure.Messaging;
-using ContractManagement.Application.Contract.Interfaces;
-using System.Text;
-using ContractManagement.Api.Services;
-using ContractManagement.Application.Common.Interfaces;
-using ContractManagement.Application.Identity.Interfaces;
-using ContractManagement.Application.Identity.Services;
-using ContractManagement.Application;
-using ContractManagement.Application.Workflow.Interfaces;
-using ContractManagement.Application.Workflow.Services;
 using ContractManagement.Domain.Identity.Enums;
+using ContractManagement.Infrastructure.Messaging;
 using ContractManagement.Infrastructure.Persistence;
 using ContractManagement.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,9 +57,13 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-// Identity & Department Services (Người 1 - Lead)
+// Identity & Department Services
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Contract Module Services
+builder.Services.AddScoped<IContractTypeService, ContractTypeService>();
+builder.Services.AddScoped<IContractTemplateVersionService, ContractTemplateVersionService>();
 
 // Workflow Module Services (Reference Implementation)
 builder.Services.AddScoped<IWorkflowConditionEvaluator, WorkflowConditionEvaluator>();
@@ -129,5 +132,4 @@ if (app.Environment.IsDevelopment())
     app.MapGet("/", () => Results.Redirect("/swagger"));
 }
 
-app.Run();
 app.Run();

@@ -11,7 +11,7 @@ namespace ContractManagement.Api.Controllers.Workflow;
 /// </summary>
 [ApiController]
 [Route("api/approvals")]
-[Tags("Approval Process (Người 4)")]
+[Tags("Approval Process")]
 [Authorize(Policy = "RequireApprover")]
 public class ApprovalController : ControllerBase
 {

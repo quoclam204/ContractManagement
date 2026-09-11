@@ -12,7 +12,7 @@ namespace ContractManagement.Api.Controllers.Identity;
 /// </summary>
 [ApiController]
 [Route("api/auth")]
-[Tags("Authentication & Identity (Người 1 - Lead)")]
+[Tags("Authentication & Identity")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;

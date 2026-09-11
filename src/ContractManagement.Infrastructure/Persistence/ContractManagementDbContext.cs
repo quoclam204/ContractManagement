@@ -1,20 +1,23 @@
+using ContractManagement.Application.Common.Interfaces;
+using ContractManagement.Application.Contract.Interfaces;
+using ContractManagement.Application.Identity.Interfaces;
 using ContractManagement.Application.Notification.Interfaces;
 using ContractManagement.Application.Workflow.Interfaces;
-using DomainNotification = ContractManagement.Domain.Notification.Entities;
-using ContractManagement.Application.Contract.Interfaces;
-using ContractManagement.Application.Workflow.Interfaces;
-using ContractManagement.Domain.Contract.Entities;
-using ContractManagement.Application.Identity.Interfaces;
-using ContractManagement.Domain.Identity.Entities;
-using ContractManagement.Application.Common.Interfaces;
 using ContractManagement.Domain;
+using ContractManagement.Domain.Contract.Entities;
+using ContractManagement.Domain.Identity.Entities;
 using ContractManagement.Domain.Workflow.Entities;
+using DomainNotification = ContractManagement.Domain.Notification.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContractManagement.Infrastructure.Persistence;
 
-public class ContractManagementDbContext : DbContext, IWorkflowDbContext, INotificationDbContext
-public class ContractManagementDbContext : DbContext, IContractManagementDbContext, IWorkflowDbContext, IIdentityDbContext, IPartnerDbContext
+public class ContractManagementDbContext : DbContext, 
+    IContractManagementDbContext, 
+    IWorkflowDbContext, 
+    IIdentityDbContext, 
+    IPartnerDbContext, 
+    INotificationDbContext
 {
     public ContractManagementDbContext(DbContextOptions<ContractManagementDbContext> options)
         : base(options)

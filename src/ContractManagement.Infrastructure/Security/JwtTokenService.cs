@@ -19,7 +19,7 @@ public class JwtTokenService : IJwtTokenService
 
     public string GenerateToken(User user)
     {
-        var secretKey = _configuration["Jwt:SecretKey"] ?? "ContractManagementSuperSecretKey2026!@#$%^";
+        var secretKey = _configuration["Jwt:SecretKey"] ?? "ContractManagementSuperSecretKey2026!@#$%^&*()_+";
         var issuer = _configuration["Jwt:Issuer"] ?? "ContractManagement";
         var audience = _configuration["Jwt:Audience"] ?? "ContractManagementApp";
         var expirationMinutes = int.TryParse(_configuration["Jwt:ExpiresInMinutes"], out var exp) ? exp : 480;
