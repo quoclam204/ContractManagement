@@ -1,5 +1,6 @@
 using ContractManagement.Application.AI.DTOs;
 using ContractManagement.Application.AI.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 
@@ -12,6 +13,7 @@ namespace ContractManagement.Api.Controllers.AI;
 [ApiController]
 [Route("api/[controller]")]
 [Tags("AI Contract Assistant")]
+[Authorize]
 public class AIContractAssistantController : ControllerBase
 {
     private readonly IAIContractAssistantService _aiService;
