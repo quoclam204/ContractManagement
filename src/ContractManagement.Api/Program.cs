@@ -16,6 +16,7 @@ using ContractManagement.Domain.Identity.Enums;
 using ContractManagement.Infrastructure.Messaging;
 using ContractManagement.Infrastructure.Persistence;
 using ContractManagement.Infrastructure.Security;
+using ContractManagement.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -50,6 +51,10 @@ builder.Services.AddRabbitMqMessaging(builder.Configuration);
 builder.Services.AddScoped<IContractManagementDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 builder.Services.AddScoped<IIdentityDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
 builder.Services.AddScoped<IPartnerDbContext>(sp => sp.GetRequiredService<ContractManagementDbContext>());
+
+// Storage Services
+var storagePath = builder.Configuration["Storage:LocalPath"] ?? "./storage";
+builder.Services.AddScoped<IStorageProvider>(_ => new LocalStorageProvider(storagePath));
 
 // Application Services (MediatR, FluentValidation, ValidationBehavior)
 builder.Services.AddApplicationServices();
